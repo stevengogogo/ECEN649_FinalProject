@@ -20,11 +20,12 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Compile TeX to PDF
       run: |
-        parallel -j2 tectonic --inplace {} ::: doc/*.tex
+        parallel -j2 tectonic {} ::: doc/*.tex
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: main.pdf
+        files: |
+          doc/*.pdf
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

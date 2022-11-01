@@ -29,7 +29,7 @@ jobs:
         parallel -j2 tectonic {} ::: doc/*.tex
     - name: Release
       uses: 'marvinpinto/action-automatic-releases@v1.2.1'
-      if: github.ref == 'refs/heads/master'
+      if: github.ref == 'refs/heads/main'
       with:
         repo_token: '${{ secrets.GITHUB_TOKEN }}'
         automatic_release_tag: 'latest-${{ steps.date.outputs.date }}'

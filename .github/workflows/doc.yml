@@ -1,5 +1,11 @@
 name: 'Build LaTex Document'
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
@@ -22,10 +28,12 @@ jobs:
       run: |
         parallel -j2 tectonic {} ::: doc/*.tex
     - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
+      uses: 'marvinpinto/action-automatic-releases@v1.2.1'
+      if: github.ref == 'refs/heads/main'
       with:
+        repo_token: '${{ secrets.GITHUB_TOKEN }}'
+        automatic_release_tag: 'latest-${{ steps.date.outputs.date }}'
+        prerelease: true
+        title: 'Developmental Build ${{ steps.date.outputs.date }}'
         files: |
           doc/*.pdf
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

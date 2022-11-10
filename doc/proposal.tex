@@ -3,7 +3,7 @@
 \usepackage{geometry}
     \geometry{scale=.8}
 \usepackage{setspace}
-    \setstretch{1.1}
+    \setstretch{1}
 \usepackage[compact]{titlesec}
 \usepackage[colorlinks = true, 
             linkcolor = cyan, 
@@ -40,25 +40,32 @@
 % Things to write: Feedforward Neural Network with Parallel Tempering MCMC
 % Dataset : time-series
 
-Bayesian learning offers a new method to estimate the model uncertainty and parameter quantification. With Bayesian learning first introduced to neural networks recently, it provides better model uncertainty quantification compared to classical neural networks. In this project, we will implement a Bayesian neural network to predict the stock price before and after COVID-19 prevailed \cite{chandra2021bayesian}. The detail of framework will be shown below.
+Bayesian learning offers a new method to estimate the model uncertainty and parameter quantification. With Bayesian learning first introduced to neural networks recently, it provides better model uncertainty quantification compared to classical neural networks. In this project, we will implement a Bayesian neural network to predict the stock price before and after COVID-19 prevailed \cite{chandra2021bayesian}. 
+
+%Our goal is to combine the Bayesian neural network with different techniques such as autoregressive integrated moving average (ARIMA) \cite{Rathnayaka2015AHS}. Furthermore, to accelerate the overall prediction time, we can adopt the an automatic differential equation with delay DE.
 
 
-\section{Goal}
+\href{https://twiecki.io/blog/2018/08/13/hierarchical_bayesian_neural_network/}{The hierarchical Bayesian method} is a powerful approach for pooling nested data. It allows group information to be shared and formulate a general model. The individual prediction can be made by its own data and borrowed inforamtion from other group with certain shrinkage.
 
-Our goal is to combine the Bayesian neural network with different techniques such as autoregressive integrated moving average (ARIMA) \cite{Rathnayaka2015AHS}. Furthermore, to accelerate the overall prediction time, we can also adopt the idea of automatic differential equation with delay DE.
+\paragraph{Our goal} is to pool the information from the stock markets of four different countries to estimate the stock dynamics of the target country with \textit{Bayesian neural network} and \textit{hierarchical modeling}. The pooled Bayesian neural network will be used as the informative prior of the target market stock. In the end, there will be four in-group Bayesian neural networks marginalized within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data.
 
-\section{Framework}
-
-Parallel tempering MCMC enables replica samplers that can explore multi-modal posterior distributions in parallel \cite{chandra2019langevin, chandra2021bayesian}. Each replica agent swaps at intervals with the Metropolis-Hastings acceptance criterion. Based on \cite{chandra2021bayesian}, 
 
 \section{Dataset}
 
-The dataset contains the closing price per day for 4 stocks in 4 countries (Table \ref{tab:my_label}). These discrete time-series data is processed by normalization ($x_{i}' = \frac{x_{i} - x_{\min}}{x_{\max} - x_{\min}}$). The dataset is labeled by two timeframes: before and during COVID-19. Based on Taken's theorem, 
-
-\footnotetext{\url{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket/tree/master/code/datasets}}
+\paragraph{The dataset} contains the closing price per day for 4 stocks in 4 countries (Table \ref{tab:my_label}). These discrete time-series data is processed by normalization ($x_{i}' = \frac{x_{i} - x_{\min}}{x_{\max} - x_{\min}}$). The dataset is labeled by two timeframes: before and during COVID-19. Suppose the closing stock price is $[x_1, \dots, x_N]$ where $N$ is the length of the time series.
 
 
-\cite[ch5]{bishop2006pattern}
+\section{Definition and Methodology}
+
+In \cite{chandra2021bayesian}, the state-space reconstruction is achieved by Taken's embedding theorem and multi-step prediction. A window of time frame with dimension $m$ and lag $T$ is used to predict the next $n$ time point (predictive horizon)(Eq. \ref{eq:wd}).
+
+\begin{equation}
+\bar{x}_1 = \underbrace{[x_{1+(t-1)T}, \dots,x_{m+(t-1)T}]}_{\text{Feature vector}};\quad y_t = \underbrace{[x_{m+(t-1)T + 1}, \dots, x_{m+(t-1)T + n}]}_{\text{Predictive Horizon}}
+\label{eq:wd}
+\end{equation}
+
+The posterior distribution of the Bayesian network is approximated by parallel tempering MCMC that enables replica samplers to explore multi-modal posterior distributions in multiprocessing\cite{chandra2019langevin, chandra2021bayesian}. Each replica agent swaps at intervals with the Metropolis-Hastings acceptance criterion. Also, the stochastic gradient Langevin dynamics (SGLD) is used for optimization.
+
 
 \section{Relation to ECEN649}
 

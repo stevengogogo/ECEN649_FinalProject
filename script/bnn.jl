@@ -52,9 +52,5 @@ end
 plot_data()
 
 
-xs
 
-"""
-Build Neural Network
-"""
 

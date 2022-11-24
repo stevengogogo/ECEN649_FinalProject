@@ -1,3 +1,8 @@
+"""
+Bayesian NN tutorial from
+https://turing.ml/dev/tutorials/03-bayesian-neural-network/
+"""
+
 using Pkg
 Pkg.activate("bnn")
 
@@ -54,3 +59,46 @@ plot_data()
 
 
 
+"""
+Bayesian Neural Network
+"""
+
+nn_initial = Chain(Dense(2,3,tanh), Dense(3,2, tanh), Dense(2,1, σ))
+
+parameters_initial, reconstruct = Flux.destructure(nn_initial)
+
+
+"""
+Probabilistic Model
+"""
+
+alpha = 0.09
+sig = sqrt(1.0/alpha)
+@model function bayes_nn(xs, ts, nparameters, reconstruct)
+    # Wights and bias
+    parameters ~ MvNormal(zeros(nparameters), sig .* ones(nparameters))
+
+    # Construct NN
+    nn = reconstruct(parameters)
+
+    # Forward NN to make prediction
+    preds = nn(xs)
+
+    # Observe
+    for i in 1:length(ts)
+        ts[i] ~ Bernoulli(preds[i])
+    end
+end
+
+# Perferm inference
+N = 5000 
+ch = sample(
+    bayes_nn(hcat(xs...), ts, length(parameters_initial), reconstruct), 
+    HMC(0.05, 4),
+    N
+)
+
+
+"""
+Validation
+"""

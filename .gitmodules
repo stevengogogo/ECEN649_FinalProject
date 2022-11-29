@@ -1,0 +1,3 @@
+[submodule "data/Bayesianneuralnet_stockmarket"]
+	path = data/Bayesianneuralnet_stockmarket
+	url = https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket.git

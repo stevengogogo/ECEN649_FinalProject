@@ -102,3 +102,24 @@ ch = sample(
 """
 Validation
 """
+
+theta = MCMCChains.group(ch, :parameters).value
+
+
+# A helper to create NN from weights `theta` and run it through data `x`
+nn_forward(x, theta) = reconstruct(theta)(x)
+
+# Plot the data we have.
+plot_data()
+
+# Find the index that provided the highest log posterior in the chain.
+_, i = findmax(ch[:lp])
+
+# Extract the max row value from i.
+i = i.I[1]
+
+# Plot the posterior distribution with a contour plot
+x1_range = collect(range(-6; stop=6, length=25))
+x2_range = collect(range(-6; stop=6, length=25))
+Z = [nn_forward([x1, x2], theta[i, :])[1] for x1 in x1_range, x2 in x2_range]
+contour!(x1_range, x2_range, Z)

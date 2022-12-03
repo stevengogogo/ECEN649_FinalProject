@@ -7,3 +7,5 @@
 - Latest [PDF](https://github.com/stevengogogo/ECEN649_FinalProject/releases/tag/latest)
 
 The final project for ECEN649 Pattern Recognition
+
+- [source code of paper](https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket)

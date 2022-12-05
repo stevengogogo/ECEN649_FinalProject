@@ -117,6 +117,21 @@ We used a Metropolis-asjusted Langevin algorithm to approximate the posterior pr
 \section{Results}
 
 
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../img/training_MALA_50000-iter.pdf}
+        \caption{Training loss (likelihood)}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../img/prediction_MALA_50000-iter.pdf}
+        \caption{Prediction (training set)}
+    \end{subfigure}
+    \caption{Training with MALA method.}
+\end{figure}
+
 
 \bibliography{ref}
 

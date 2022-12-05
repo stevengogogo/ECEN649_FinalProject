@@ -20,6 +20,29 @@ The randomness of stock market challenge investments to be reliable. Many of app
 
 \section{Introduction}
 
+
+% Describe the goal of the project briefly, the data set, and the pattern recognition techniques to be used (e.g., data cleaning, data visualization/exploration, feature selection/extraction, classification/regression method, model selection, and error estimation).
+
+
+% Dataset Bayesian neural network
+% Things to write: Feedforward Neural Network with Parallel Tempering MCMC
+% Dataset : time-series
+
+Bayesian learning offers an intuitive method to estimate uncertainty and parameter quantification that is crucial for the stock market.  In this project, we will re-implement the Bayesian neural network and introduce hierarchical modeling to predict the stock price before and after COVID-19 prevalence \cite{chandra2021bayesian}. 
+
+% With Bayesian learning first introduced to neural networks recently, it provides better model uncertainty quantification compared to classical neural networks.
+
+%Our goal is to combine the Bayesian neural network with different techniques such as autoregressive integrated moving average (ARIMA) \cite{Rathnayaka2015AHS}. Furthermore, to accelerate the overall prediction time, we can adopt the an automatic differential equation with delay DE.
+
+
+The impact of COVID-19 spreading on the stock price of a company in a country is predicted via Bayesian neural network with parallel tempering MCMC sampling\cite{chandra2021bayesian, chandra2019langevin} with uncertainty estimation. In \cite{chandra2021bayesian}, the prediction is made by the historical stock prices of a given country, which loses the information from other countries impacted by COVID-19 earlier. Also,
+\href{https://twiecki.io/blog/2018/08/13/hierarchical_bayesian_neural_network/}{the hierarchical Bayesian method} provides an intuitive approach for pooling nested data, and allows group information to be shared and formulate a general model. 
+
+\paragraph{Our goal} is to pool the information from the stock markets of four different countries to estimate the stock dynamics of the target country with \textit{Bayesian neural network} and \textit{hierarchical modeling}. The pooled Bayesian neural network will be used as the informative prior of the target market stock. In the end, four in-group Bayesian neural networks will be marginalized via within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data, and potentially improve prediction with augmented information.
+
+
+
+
 \section{Methods}
 
 
@@ -77,6 +100,21 @@ y_t =
     \caption{Stock markets of a company before and during COVID-19 \cite{chandra2021bayesian}.}
     \label{fig:data-series}
 \end{figure}
+
+
+\subsection{Framework}
+
+The sequential neural network with one hidden layer is used for the regression problem.
+
+The implementation is based on \textit{Haiku}\cite{haiku2020github}, a neural network library with JAX backend.
+
+\subsection{Training}
+
+We used a Metropolis-asjusted Langevin algorithm to approximate the posterior probability density.
+
+
+
+\section{Results}
 
 
 

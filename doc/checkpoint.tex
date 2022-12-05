@@ -28,6 +28,30 @@ The randomness of stock market challenge investments to be reliable. Many of app
 
 
 
+The original data set is $x_t = \{x_{1}, ..., x_{Total}\}$, the training input is a matrix with dimension $m \times s$ (where m is the capture window, and $s$ is the number of samples). The sample is produced by shifting the original time series with lag of $2$.
+
+\begin{equation}
+\bar{x}_t = 
+\underbrace{\begin{bmatrix}
+    x_{1+(t-1)T} & \cdots & x_{m+(t-1)T}\\
+    x_{3+(t-1)T} & \cdots & x_{2m+3+(t-1)T}\\
+    \vdots & \vdots & \vdots 
+\end{bmatrix}}_{\text{m(Capture windows)}}
+\end{equation}
+
+\begin{equation}
+y_t = 
+\underbrace{\begin{bmatrix}
+    x_{m+(t-1)T + 1} & \cdots & x_{m+(t-1)T+ n}\\
+    x_{2m+3+(t-1)T + 1} & \cdots & x_{2m+3+(t-1)T+ n}\\
+    \vdots & \vdots & \vdots
+\end{bmatrix}}_{\text{n (Prediction Horizons)}}
+\end{equation}
+
+
+
+
+
 \section{Submission of papers to NeurIPS 2022}
 
 

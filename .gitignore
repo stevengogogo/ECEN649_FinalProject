@@ -1,3 +1,5 @@
 doc/*.pdf
 *.aux
 *.log
+*Manifest.toml
+.ipynb_checkpoints/

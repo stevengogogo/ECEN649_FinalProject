@@ -4,6 +4,8 @@
 \input{setup/final-report}
 \input{setup/author}
 
+
+
 \title{Predicting Stock Market with Bayesian Neural Network}
 
 
@@ -49,15 +51,35 @@ y_t =
 \end{equation}
 
 
+\begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{../img/MMM8_train.pdf}
+         \caption{Train set (before COVID-19)}
+     \end{subfigure}%
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{../img/MMM8_test.pdf}
+         \caption{Test set (before COVID-19)}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{../img/MMM_covid_train.pdf}
+         \caption{Train set during COVID-19}
+     \end{subfigure}%
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{../img/MMM_covid_test.pdf}
+         \caption{Test set during COVID-19}
+     \end{subfigure}
+    \caption{Stock markets of a company before and during COVID-19 \cite{chandra2021bayesian}.}
+    \label{fig:data-series}
+\end{figure}
 
 
 
-\section{Submission of papers to NeurIPS 2022}
-
-
-Please read the instructions below carefully and follow them faithfully.
-
-
-\subsection{Style}
+\bibliography{ref}
 
 \end{document}

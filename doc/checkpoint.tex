@@ -38,7 +38,7 @@ Bayesian learning offers an intuitive method to estimate uncertainty and paramet
 The impact of COVID-19 spreading on the stock price of a company in a country is predicted via Bayesian neural network with parallel tempering MCMC sampling\cite{chandra2021bayesian, chandra2019langevin} with uncertainty estimation. In \cite{chandra2021bayesian}, the prediction is made by the historical stock prices of a given country, which loses the information from other countries impacted by COVID-19 earlier. 
 %Also,\href{https://twiecki.io/blog/2018/08/13/hierarchical_bayesian_neural_network/}{the hierarchical Bayesian method} provides an intuitive approach for pooling nested data, and allows group information to be shared and formulate a general model. 
 
-\paragraph{Our goal} is to pool the information from the stock markets of four different countries to estimate the stock dynamics of the target country with \textit{Bayesian neural network} and \textit{hierarchical modeling}. The pooled Bayesian neural network will be used as the informative prior of the target market stock. In the end, four in-group Bayesian neural networks will be marginalized via within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data, and potentially improve prediction with augmented information.
+\paragraph{Our goal} is to pool the information from the stock markets of four different countries to estimate the stock dynamics of the target country with \textit{Bayesian neural network}. The pooled Bayesian neural network will be used as the informative prior of the target market stock. %In the end, four in-group Bayesian neural networks will be marginalized via within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data, and potentially improve prediction with augmented information.
 
 
 
@@ -46,7 +46,7 @@ The impact of COVID-19 spreading on the stock price of a company in a country is
 
 
 
-\section{Dataset}
+\subsection{Dataset}
 
 \paragraph{The dataset} contains the closing price per day for 4 stocks in 4 countries (Table \ref{tab:my_label}). These discrete time-series data is processed by normalization ($x_{i}' = \frac{x_{i} - x_{\min}}{x_{\max} - x_{\min}}$). The dataset is labeled by two timeframes: before and during COVID-19. Suppose the closing stock price is $[x_1, \dots, x_N]$ where $N$ is the length of the time series, the purpose is to predict the time series after the first few days of COVID-19 spreading.
 
@@ -148,7 +148,7 @@ In \cite{chandra2021bayesian}, the parallel tempering method is used to train th
 
 \subsection{Suboptimal training with MALA}
 
-The iteration of $5\times 10^4$ is used to derive the posterior distribution. Each iteration yields $30$ samples to calculate the log likelihood.
+The iteration of $5\times 10^4$ is used to derive the posterior distribution. Each iteration yields $30$ samples to calculate the log-likelihood. 
 
 \begin{figure}[h]
     \centering
@@ -162,8 +162,9 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
         \centering
         \includegraphics[width=\textwidth]{../img/prediction_MALA_50000-iter.pdf}
         \caption{Prediction (training set)}
+        \label{fig:pred-sub}
     \end{subfigure}
-    \caption{Training with MALA method (See \href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_fit_time_window.ipynb}{notebook} for implementation details.). The training process took $30$ min on MacPro M1 Chip.}
+    \caption{Training with MALA method (See \href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_fit_time_window.ipynb}{notebook} for implementation details.). The training process took $30$ min on MacPro M1 Chip. (b) Prediction is made by sampling $30$ times. Each time series is plotted in semi-transparent gray. The mean and ground truth are plotted, respectively.}
     \label{fig:pred}
 \end{figure}
 

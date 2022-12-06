@@ -28,18 +28,17 @@ The randomness of stock market challenge investments to be reliable. Many of app
 % Things to write: Feedforward Neural Network with Parallel Tempering MCMC
 % Dataset : time-series
 
-Bayesian learning offers an intuitive method to estimate uncertainty and parameter quantification that is crucial for the stock market.  In this project, we will re-implement the Bayesian neural network and introduce hierarchical modeling to predict the stock price before and after COVID-19 prevalence \cite{chandra2021bayesian}. 
+Bayesian learning offers an intuitive method to estimate uncertainty and parameter quantification that is crucial for the stock market.  In this project, we will re-implement the Bayesian neural network to predict the stock price before and after COVID-19 prevalence \cite{chandra2021bayesian}. 
 
 % With Bayesian learning first introduced to neural networks recently, it provides better model uncertainty quantification compared to classical neural networks.
 
 %Our goal is to combine the Bayesian neural network with different techniques such as autoregressive integrated moving average (ARIMA) \cite{Rathnayaka2015AHS}. Furthermore, to accelerate the overall prediction time, we can adopt the an automatic differential equation with delay DE.
 
 
-The impact of COVID-19 spreading on the stock price of a company in a country is predicted via Bayesian neural network with parallel tempering MCMC sampling\cite{chandra2021bayesian, chandra2019langevin} with uncertainty estimation. In \cite{chandra2021bayesian}, the prediction is made by the historical stock prices of a given country, which loses the information from other countries impacted by COVID-19 earlier. Also,
-\href{https://twiecki.io/blog/2018/08/13/hierarchical_bayesian_neural_network/}{the hierarchical Bayesian method} provides an intuitive approach for pooling nested data, and allows group information to be shared and formulate a general model. 
+The impact of COVID-19 spreading on the stock price of a company in a country is predicted via Bayesian neural network with parallel tempering MCMC sampling\cite{chandra2021bayesian, chandra2019langevin} with uncertainty estimation. In \cite{chandra2021bayesian}, the prediction is made by the historical stock prices of a given country, which loses the information from other countries impacted by COVID-19 earlier. 
+%Also,\href{https://twiecki.io/blog/2018/08/13/hierarchical_bayesian_neural_network/}{the hierarchical Bayesian method} provides an intuitive approach for pooling nested data, and allows group information to be shared and formulate a general model. 
 
 \paragraph{Our goal} is to pool the information from the stock markets of four different countries to estimate the stock dynamics of the target country with \textit{Bayesian neural network} and \textit{hierarchical modeling}. The pooled Bayesian neural network will be used as the informative prior of the target market stock. In the end, four in-group Bayesian neural networks will be marginalized via within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data, and potentially improve prediction with augmented information.
-
 
 
 
@@ -59,7 +58,7 @@ The original data set is $x_t = \{x_{1}, ..., x_{Total}\}$, the training input i
 \bar{x}_t = 
 \underbrace{\begin{bmatrix}
     x_{1+(t-1)T} & \cdots & x_{m+(t-1)T}\\
-    x_{3+(t-1)T} & \cdots & x_{2m+3+(t-1)T}\\
+    x_{3+(t-1)T} & \cdots & x_{m+3+(t-1)T}\\
     \vdots & \vdots & \vdots 
 \end{bmatrix}}_{\text{m(Capture windows)}}
 \end{equation}
@@ -68,7 +67,7 @@ The original data set is $x_t = \{x_{1}, ..., x_{Total}\}$, the training input i
 y_t = 
 \underbrace{\begin{bmatrix}
     x_{m+(t-1)T + 1} & \cdots & x_{m+(t-1)T+ n}\\
-    x_{2m+3+(t-1)T + 1} & \cdots & x_{2m+3+(t-1)T+ n}\\
+    x_{m+3+(t-1)T + 1} & \cdots & x_{m+3+(t-1)T+ n}\\
     \vdots & \vdots & \vdots
 \end{bmatrix}}_{\text{n (Prediction Horizons)}}
 \end{equation}
@@ -97,39 +96,75 @@ y_t =
          \includegraphics[width=\textwidth]{../img/MMM_covid_test.pdf}
          \caption{Test set during COVID-19}
      \end{subfigure}
-    \caption{Stock markets of a company before and during COVID-19 \cite{chandra2021bayesian}.}
+    \caption{Stock markets of a company before and during COVID-19 \cite{chandra2021bayesian} (\href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_data_visualization.ipynb}{source code}).}
     \label{fig:data-series}
 \end{figure}
 
 
 \subsection{Framework}
 
-The sequential neural network with one hidden layer is used for the regression problem.
+The sequential neural network with one hidden layer is used for the regression problem. The activation function is $\tanh$\footnote{Notebooks and source code is provided at \url{https://github.com/stevengogogo/ECEN649_FinalProject}.}.
 
-The implementation is based on \textit{Haiku}\cite{haiku2020github}, a neural network library with JAX backend.
+The implementation is based on \textit{Haiku} \cite{haiku2020github}, a neural network library with \textit{JAX} backend \cite{jax2018github}.
+
+
+
 
 \subsection{Training}
 
-We used a Metropolis-asjusted Langevin algorithm to approximate the posterior probability density.
+The training process leverages the Bayes theorem (Eq. \ref{eq:bayes}):
 
+\begin{equation}
+P(\theta | D) \propto P(D|\theta) P(\theta)
+\label{eq:bayes}
+\end{equation}
+
+where $\theta$ are parameters and $D$ is dataset. The prior distribution 
+
+\begin{equation}
+P(\theta) \sim Normal(0, \Sigma)
+\end{equation}
+
+
+Because there is no closed form of the posterior distribution, a Metropolis-adjusted Langevin algorithm (MALA) is applied to approximate the posterior probability density, and the gradient of probability is calculated via automatic differentiation. The Langevin algorithm provides a better acceptance rate compared to the naive Metropolis-hasting algorithm\cite{roberts1998optimal}. 
+
+The sampling process is divided into three steps:
+
+\begin{enumerate}
+    \item \textbf{Initiation} The initiation step uses the prior distribution to sample initial parameters.
+    \item \textbf{Proposal} The proposed step uses proposal distribution to generate a  parameter set. This step is optimized by a variety of approaches\cite{jospin2022a}: Hamiltonian Monte Carlo\cite{neal1996, neal2011}, MALA, and other gradient-based method provide \textit{smart} sampling to yield better mixing and acceptance rate. These approaches are available at \textit{jax-bayes} package\footnote{https://github.com/jamesvuc/jax-bayes}. In MALA, the stochastic differential equation is solved to generate a new state. This approach is inspired by the physical diffusion and have optimal acceptance rate $0.574$\cite{roberts1998optimal}.
+    \item \textbf{Update} The generated sample is decided to accept or reject with the ratio of the probability of current and proposed states. Though the ratio is measured with different methods, the purpose is to avoid integrating the marginal probability of posterior distribution.
+\end{enumerate}
+
+
+The log likelihood is used to avoid the numerical instability when accountering small numbers. In practical (Fig. \ref{fig:training-log}), the log likelihood can be $10^{-14}$. 
+
+\subsection{Difference from the \cite{chandra2021bayesian}}
+
+In \cite{chandra2021bayesian}, the parallel tempering method is used to train the Bayesian neural network. The source code of \cite{chandra2019langevin} is implemented by NumPy and Multiprocessing. In this project, we are exploring one or several sampling methods, and leveraging the just-in-time compilation powered by JAX\cite{jax2018github}. The sampling process is compiled to machine code and can be moved to hardware acceleration such as GPU/TPU.
 
 
 \section{Results}
 
+\subsection{Suboptimal training with MALA}
 
-\begin{figure}
+The iteration of $5\times 10^4$ is used to derive the posterior distribution. Each iteration yields $30$ samples to calculate the log likelihood.
+
+\begin{figure}[h]
     \centering
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../img/training_MALA_50000-iter.pdf}
-        \caption{Training loss (likelihood)}
+        \caption{Training loss (likelihood).}
+        \label{fig:training-log}
     \end{subfigure}%
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../img/prediction_MALA_50000-iter.pdf}
         \caption{Prediction (training set)}
     \end{subfigure}
-    \caption{Training with MALA method.}
+    \caption{Training with MALA method (See \href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_fit_time_window.ipynb}{notebook} for implementation details.). The training process took $30$ min on MacPro M1 Chip.}
+    \label{fig:pred}
 \end{figure}
 
 

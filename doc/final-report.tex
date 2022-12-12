@@ -136,7 +136,7 @@ P(\theta) \sim Normal(0, \Sigma)
 The output of a neural network function is 
 
 \begin{equation}
-    \hat{y} = f(x, W)
+    \hat{y} = f(x, \theta)
     \label{eq:net-output}
 \end{equation}
 
@@ -157,9 +157,24 @@ Thus, the likelihood is a Gaussian distribution with network output ($\hat{y}$) 
 \end{equation}
 
 
-To find the most probable wight vector ($W$, Eq. \ref{eq:net-output}), the Maximum a Posteriori (MAP) 
+To find the most probable wight vector ($W$, Eq. \ref{eq:net-output}), the Maximum a Posteriori (MAP) is applied to \textit{maximize} the log-likelihood (Eq. \ref{eq:log-likelihood}). Because $\log$ (Eq. \ref{eq:likelihood}) is a monotonous function, the maximization of posterior can be achieved by maximizing the sum. From Eq. \ref{eq:bayes}, 
+
+\begin{align}
+    p(\theta|D) &= p(\theta) p(D|\theta) / p(D)\\
+    \log(p(\theta|D)) &= \underbrace{\log(p(\theta))}_{\text{Log. prob. under prior}} + \underbrace{\log(p(D|\theta))}_{log. likelihood} - \underbrace{\log(p(D))}_{\text{log marginal probability of } D \text{(ignorable)}}\label{eq:log-sums}
+\end{align}
+
+The logarithm of posterior distribution is related to the log probability and log likelihood. Noted that the log marginal probability of $D$ is ignorable because it is a constant and independent of $\theta$. This ignorance can bypass the necessity of integration over the distribution.
 
 
+Assuming data is independently and identical distributed (i.i.d.), the log-likelihood is computed by the product of the likelihood of all trials (Eq. \ref{eq:sum-log}).
+
+\begin{equation}
+    P(D|W) = \prod_{i\in \mathbb{D}} p(y_i | W) = \prod_{i \in \mathbb{D}} p(y_i | f(x, W))
+\label{eq:sum-log}
+\end{equation}
+
+where $D$ is the sampled dataset from sample space $\mathbb{D}$. From Eq. \ref{eq:log-sums} and Eq. \ref{eq:sum-log}, the maximization of posterior distribution can be done by looking for right setting of prior and calculating likelihood. However, the full posterior distribution over all parameters can not be easily derived, the Monte Carlo sampling method is applied to generate sample to approximate the posterior density function. 
 
 \subsection{Approximation of Posterior Distribution by Monte Carlo Approaches}
 
@@ -204,6 +219,12 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
     \caption{Training with MALA method. The training process took $30$ min on MacPro M1 Chip. (b) Prediction is made by sampling $30$ times. Each time series is plotted in semi-transparent gray. The mean and ground truth are plotted, respectively. (See \href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_fit_time_window.ipynb}{notebook} for implementation details.)}
     \label{fig:pred}
 \end{figure}
+
+\section{Discussion}
+
+\subsection{The independence of dataset is questionable?}
+
+In \cite{chandra2021bayesian}, the log likelihood is applied to find the best distribution of posterior. The likelihood $p(D|W)$ is the product of all I.I.D. experiments
 
 
 \bibliography{ref}

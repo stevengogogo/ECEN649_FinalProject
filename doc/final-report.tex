@@ -1,518 +1,232 @@
 \documentclass{article}
 
-
+\usepackage{tabularx}
 \input{setup/final-report}
 \input{setup/author}
 
-\title{Formatting Instructions For NeurIPS 2022}
+
+
+\title{Predicting Stock Market with Bayesian Neural Network}
 
 
 \begin{document}
-
 
 \maketitle
 
 
 \begin{abstract}
-  The abstract paragraph should be indented \nicefrac{1}{2}~inch (3~picas) on
-  both the left- and right-hand margins. Use 10~point type, with a vertical
-  spacing (leading) of 11~points.  The word \textbf{Abstract} must be centered,
-  bold, and in point size 12. Two line spaces precede the abstract. The abstract
-  must be limited to one paragraph.
+The randomness of the stock market challenge investments to be reliable. Many approaches have been introduced to find the hidden pattern behind the transitions. However, error estimation with the non-parametric method is in the early stage. In this project, we used a Bayesian neural network to predict discrete  time-series data with Taken's embedding theorem. The Langevin Monte Carlo Markov Chain method is applied to measure the posterior distribution. The purpose of this project is to provide a model-free approach with uncertainty quantification that is essential to the investment strategy. 
 \end{abstract}
 
+\section{Introduction}
 
-\section{Submission of papers to NeurIPS 2022}
 
+% Describe the goal of the project briefly, the data set, and the pattern recognition techniques to be used (e.g., data cleaning, data visualization/exploration, feature selection/extraction, classification/regression method, model selection, and error estimation).
 
-Please read the instructions below carefully and follow them faithfully.
 
+% Dataset Bayesian neural network
+% Things to write: Feedforward Neural Network with Parallel Tempering MCMC
+% Dataset : time-series
 
-\subsection{Style}
+Bayesian learning offers an intuitive method to estimate uncertainty and parameter quantification that is crucial for the stock market.  In this project, we reimplemented the Bayesian neural network to predict the stock price before and after COVID-19 prevalence \cite{chandra2021bayesian}. 
 
+% With Bayesian learning first introduced to neural networks recently, it provides better model uncertainty quantification compared to classical neural networks.
 
-Papers to be submitted to NeurIPS 2022 must be prepared according to the
-instructions presented here. Papers may only be up to {\bf nine} pages long,
-including figures. Additional pages \emph{containing only acknowledgments and
-references} are allowed. Papers that exceed the page limit will not be
-reviewed, or in any other way considered for presentation at the conference.
+%Our goal is to combine the Bayesian neural network with different techniques such as autoregressive integrated moving average (ARIMA) \cite{Rathnayaka2015AHS}. Furthermore, to accelerate the overall prediction time, we can adopt the an automatic differential equation with delay DE.
 
 
-The margins in 2022 are the same as those in 2007, which allow for $\sim$$15\%$
-more words in the paper compared to earlier years.
+The impact of COVID-19 spreading on the stock price of a company in a country is predicted via Bayesian neural network with parallel tempering MCMC sampling\cite{chandra2021bayesian, chandra2019langevin} with uncertainty estimation. In \cite{chandra2021bayesian}, the prediction is made by the historical stock prices of a given country, which loses the information from other countries impacted by COVID-19 earlier. 
+%Also,\href{https://twiecki.io/blog/2018/08/13/hierarchical_bayesian_neural_network/}{the hierarchical Bayesian method} provides an intuitive approach for pooling nested data, and allows group information to be shared and formulate a general model. 
 
+\paragraph{Our goal} is to apply alternative sampling methods, such as Langevin MCMC or Hamiltonian MCMC, other than \cite{chandra2019langevin}, and predict the time-series data with Bayesian neural network. The pooled Bayesian neural network will be used as the informative prior of the target market stock. On the other hand, we introduce the just-in-time compilation (JIT), and automatic differentiation for Langevin Monte Carlo approaches with \textit{JAX}\cite{jax2018github} to compare the original method built by \textit{NumPy} and \textit{Multiprocessing}\cite{chandra2021bayesian}. %In the end, four in-group Bayesian neural networks will be marginalized via within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data, and potentially improve prediction with augmented information.
 
-Authors are required to use the NeurIPS \LaTeX{} style files obtainable at the
-NeurIPS website as indicated below. Please make sure you use the current files
-and not previous versions. Tweaking the style files may be grounds for
-rejection.
 
 
-\subsection{Retrieval of style files}
+\section{Methods}
 
 
-The style files for NeurIPS and other conference information are available on
-the World Wide Web at
-\begin{center}
-  \url{http://www.neurips.cc/}
-\end{center}
-The file \verb+neurips_2022.pdf+ contains these instructions and illustrates the
-various formatting requirements your NeurIPS paper must satisfy.
+\subsection{Dataset}
 
+The stock dataset contains the closing price per day for 4 stocks in 4 countries (Table \ref{tab:my_label}). These discrete time-series data is processed by normalization ($x_{i}' = \frac{x_{i} - x_{\min}}{x_{\max} - x_{\min}}$). The dataset is labeled by two timeframes: before and during COVID-19 (Fig. \ref{fig:data-series}). Suppose the closing stock price is $[x_1, \dots, x_N]$ where $N$ is the length of the time series. The purpose is to predict the time series (prediction horizon) after the first few days (capture window).
 
-The only supported style file for NeurIPS 2022 is \verb+neurips_2022.sty+,
-rewritten for \LaTeXe{}.  \textbf{Previous style files for \LaTeX{} 2.09,
-  Microsoft Word, and RTF are no longer supported!}
 
 
-The \LaTeX{} style file contains three optional arguments: \verb+final+, which
-creates a camera-ready copy, \verb+preprint+, which creates a preprint for
-submission to, e.g., arXiv, and \verb+nonatbib+, which will not load the
-\verb+natbib+ package for you in case of package clash.
+The original data set is $x_t = \{x_{1}, ..., x_{Total}\}$, the training input is a matrix with dimension $m \times s$ (where m is the capture window, and $s$ is the number of samples). The sample is produced by shifting the original time series with a lag of $2$.  These discrete time-series data is processed by normalization ($x_{i}' = \frac{x_{i} - x_{\min}}{x_{\max} - x_{\min}}$). 
 
+\begin{equation}
+\bar{x}_t = 
+\underbrace{\begin{bmatrix}
+    x_{1+(t-1)T} & \cdots & x_{m+(t-1)T}\\
+    x_{3+(t-1)T} & \cdots & x_{m+3+(t-1)T}\\
+    \vdots & \vdots & \vdots 
+\end{bmatrix}}_{\text{m (Capture windows)}}
+\label{eq:window}
+\end{equation}
 
-\paragraph{Preprint option}
-If you wish to post a preprint of your work online, e.g., on arXiv, using the
-NeurIPS style, please use the \verb+preprint+ option. This will create a
-nonanonymized version of your work with the text ``Preprint. Work in progress.''
-in the footer. This version may be distributed as you see fit. Please \textbf{do
-  not} use the \verb+final+ option, which should \textbf{only} be used for
-papers accepted to NeurIPS.
-
-
-At submission time, please omit the \verb+final+ and \verb+preprint+
-options. This will anonymize your submission and add line numbers to aid
-review. Please do \emph{not} refer to these line numbers in your paper as they
-will be removed during generation of camera-ready copies.
-
-
-The file \verb+neurips_2022.tex+ may be used as a ``shell'' for writing your
-paper. All you have to do is replace the author, title, abstract, and text of
-the paper with your own.
-
-
-The formatting instructions contained in these style files are summarized in
-Sections \ref{gen_inst}, \ref{headings}, and \ref{others} below.
-
-
-\section{General formatting instructions}
-\label{gen_inst}
-
-
-The text must be confined within a rectangle 5.5~inches (33~picas) wide and
-9~inches (54~picas) long. The left margin is 1.5~inch (9~picas).  Use 10~point
-type with a vertical spacing (leading) of 11~points.  Times New Roman is the
-preferred typeface throughout, and will be selected for you by default.
-Paragraphs are separated by \nicefrac{1}{2}~line space (5.5 points), with no
-indentation.
-
-
-The paper title should be 17~point, initial caps/lower case, bold, centered
-between two horizontal rules. The top rule should be 4~points thick and the
-bottom rule should be 1~point thick. Allow \nicefrac{1}{4}~inch space above and
-below the title to rules. All pages should start at 1~inch (6~picas) from the
-top of the page.
-
-
-For the final version, authors' names are set in boldface, and each name is
-centered above the corresponding address. The lead author's name is to be listed
-first (left-most), and the co-authors' names (if different address) are set to
-follow. If there is only one co-author, list both author and co-author side by
-side.
-
-
-Please pay special attention to the instructions in Section \ref{others}
-regarding figures, tables, acknowledgments, and references.
-
-
-\section{Headings: first level}
-\label{headings}
-
-
-All headings should be lower case (except for first word and proper nouns),
-flush left, and bold.
-
-
-First-level headings should be in 12-point type.
-
-
-\subsection{Headings: second level}
-
-
-Second-level headings should be in 10-point type.
-
-
-\subsubsection{Headings: third level}
-
-
-Third-level headings should be in 10-point type.
-
-
-\paragraph{Paragraphs}
-
-
-There is also a \verb+\paragraph+ command available, which sets the heading in
-bold, flush left, and inline with the text, with the heading followed by 1\,em
-of space.
-
-
-\section{Citations, figures, tables, references}
-\label{others}
-
-
-These instructions apply to everyone.
-
-
-\subsection{Citations within the text}
-
-
-The \verb+natbib+ package will be loaded for you by default.  Citations may be
-author/year or numeric, as long as you maintain internal consistency.  As to the
-format of the references themselves, any style is acceptable as long as it is
-used consistently.
-
-
-The documentation for \verb+natbib+ may be found at
-\begin{center}
-  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
-\end{center}
-Of note is the command \verb+\citet+, which produces citations appropriate for
-use in inline text.  For example,
-\begin{verbatim}
-   \citet{hasselmo} investigated\dots
-\end{verbatim}
-produces
-\begin{quote}
-  Hasselmo, et al.\ (1995) investigated\dots
-\end{quote}
-
-
-If you wish to load the \verb+natbib+ package with options, you may add the
-following before loading the \verb+neurips_2022+ package:
-\begin{verbatim}
-   \PassOptionsToPackage{options}{natbib}
-\end{verbatim}
-
-
-If \verb+natbib+ clashes with another package you load, you can add the optional
-argument \verb+nonatbib+ when loading the style file:
-\begin{verbatim}
-   \usepackage[nonatbib]{neurips_2022}
-\end{verbatim}
-
-
-As submission is double blind, refer to your own published work in the third
-person. That is, use ``In the previous work of Jones et al.\ [4],'' not ``In our
-previous work [4].'' If you cite your other papers that are not widely available
-(e.g., a journal paper under review), use anonymous author names in the
-citation, e.g., an author of the form ``A.\ Anonymous.''
-
-
-\subsection{Footnotes}
-
-
-Footnotes should be used sparingly.  If you do require a footnote, indicate
-footnotes with a number\footnote{Sample of the first footnote.} in the
-text. Place the footnotes at the bottom of the page on which they appear.
-Precede the footnote with a horizontal rule of 2~inches (12~picas).
-
-
-Note that footnotes are properly typeset \emph{after} punctuation
-marks.\footnote{As in this example.}
-
-
-\subsection{Figures}
+\begin{equation}
+y_t = 
+\underbrace{\begin{bmatrix}
+    x_{m+(t-1)T + 1} & \cdots & x_{m+(t-1)T+ n}\\
+    x_{m+3+(t-1)T + 1} & \cdots & x_{m+3+(t-1)T+ n}\\
+    \vdots & \vdots & \vdots
+\end{bmatrix}}_{\text{n (Prediction Horizons)}}
+\label{eq:ywindow}
+\end{equation}
 
 
 \begin{figure}
-  \centering
-  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{Sample figure caption.}
+     \centering
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{../img/MMM8_train.pdf}
+         \caption{Train set (before COVID-19)}
+     \end{subfigure}%
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{../img/MMM8_test.pdf}
+         \caption{Test set (before COVID-19)}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{../img/MMM_covid_train.pdf}
+         \caption{Train set during COVID-19}
+     \end{subfigure}%
+     \begin{subfigure}[b]{0.5\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{../img/MMM_covid_test.pdf}
+         \caption{Test set during COVID-19}
+     \end{subfigure}
+    \caption{Stock markets of a company before and during COVID-19 \cite{chandra2021bayesian} (\href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_data_visualization.ipynb}{source code}). The training set and testing set is recorded from the different time frame. The objective of \cite{chandra2021bayesian} is to fit each dataset with the same pipeline.}
+    \label{fig:data-series}
 \end{figure}
 
 
-All artwork must be neat, clean, and legible. Lines should be dark enough for
-purposes of reproduction. The figure number and caption always appear after the
-figure. Place one line space before the figure caption and one line space after
-the figure. The figure caption should be lower case (except for first word and
-proper nouns); figures are numbered consecutively.
+The state-space reconstruction is based on Taken's embedding theorem that guarantees the embedding time series (Eq. \ref{eq:window}) retains the manifold of the original dynamics\cite{takens1981detecting}.
+
+\subsection{Framework}
+
+The sequential neural network with one hidden layer is used for the regression problem. The activation function is $\tanh$\footnote{Notebooks and source code is provided at \url{https://github.com/stevengogogo/ECEN649_FinalProject}.}.
+
+The implementation is based on \textit{Haiku} \cite{haiku2020github}, a neural network library with \textit{JAX} backend \cite{jax2018github}.
 
 
-You may use color figures.  However, it is best for the figure captions and the
-paper body to be legible if the paper is printed in either black/white or in
-color.
+The input dimension is equal to the window size ($m$, Eq. \ref{eq:window}), and the output dimension corresponds to the prediction horizon ($n$, Eq. \ref{eq:ywindow}). The hidden layer contains 128 nodes. In practice, the properties of the Bayesian neural networks are saved with standard fixed-point neural networks and sampled parameters.
 
 
-\subsection{Tables}
+\subsection{Training}
+
+The training process leverages the Bayes theorem (Eq. \ref{eq:bayes}):
+
+\begin{equation}
+P(\theta | D) \propto P(D|\theta) P(\theta)
+\label{eq:bayes}
+\end{equation}
+
+where $\theta$ are parameters and $D$ is dataset. The prior distribution 
+
+\begin{equation}
+P(\theta) \sim Normal(0, \Sigma)
+\label{eq:weight-prior}
+\end{equation}
 
 
-All tables must be centered, neat, clean and legible.  The table number and
-title always appear before the table.  See Table~\ref{sample-table}.
+\subsection{Supervised Maximum likelihood learning}
+
+The output of a neural network function is 
+
+\begin{equation}
+    \hat{y} = f(x, W)
+    \label{eq:net-output}
+\end{equation}
+
+where $W$ is the random vector of weights of a neural network, $\hat{y}$ the predicted value, and $f$ the function of the neural network.
+
+Because the weights ($W$) have Normal prior (Eq. \ref{eq:weight-prior}),  the likelihood of the target value ($y$) is 
+
+\begin{equation}
+    p(y|\hat{y}) = \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(y-\hat{y})^2}{2\sigma^2}}
+    \label{eq:likelihood}
+\end{equation}
+
+Thus, the likelihood is a Gaussian distribution with network output ($\hat{y}$) as a center. Eq. \ref{eq:likelihood} can be expressed in $\log$-form to avoid numerical instability of small values (Eq. \ref{eq:log-likelihood}).
+
+\begin{equation}
+    log (p(y|\hat{y})) = k + \frac{(y-\hat{y})^2}{2\sigma^2}
+    \label{eq:log-likelihood}
+\end{equation}
 
 
-Place one line space before the table title, one line space after the
-table title, and one line space after the table. The table title must
-be lower case (except for first word and proper nouns); tables are
-numbered consecutively.
+To find the most probable wight vector ($W$, Eq. \ref{eq:net-output}), the Maximum a Posteriori (MAP) 
 
 
-Note that publication-quality tables \emph{do not contain vertical rules.} We
-strongly suggest the use of the \verb+booktabs+ package, which allows for
-typesetting high-quality, professional tables:
-\begin{center}
-  \url{https://www.ctan.org/pkg/booktabs}
-\end{center}
-This package was used to typeset Table~\ref{sample-table}.
+
+\subsection{Approximation of Posterior Distribution by Monte Carlo Approaches}
+
+Because there is no closed form of the posterior distribution, a Metropolis-adjusted Langevin algorithm (MALA) is applied to approximate the posterior probability density, and the gradient of probability is calculated via automatic differentiation. The Langevin algorithm provides a better acceptance rate compared to the naive Metropolis-hasting algorithm\cite{roberts1998optimal}. 
+
+The sampling process is divided into three steps:
+
+\begin{enumerate}
+    \item \textbf{Initiation} The initiation step uses the prior distribution to sample initial parameters.
+    \item \textbf{Proposal} The proposed step uses proposal distribution to generate a  parameter set. This step is optimized by a variety of approaches\cite{jospin2022a}: Hamiltonian Monte Carlo\cite{neal1996, neal2011}, MALA, and other gradient-based methods provide \textit{smart} sampling to yield better mixing and acceptance rate. These approaches are available at \textit{jax-bayes} package\footnote{https://github.com/jamesvuc/jax-bayes}. In MALA, the stochastic differential equation is solved to generate a new state. This approach is inspired by the physical diffusion and has an optimal acceptance rate $0.574$\cite{roberts1998optimal}.
+    \item \textbf{Update} The generated sample is decided to accept or reject with the ratio of the probability of current and proposed states. Though the ratio is measured with different methods, the purpose is to avoid integrating the marginal probability of posterior distribution.
+\end{enumerate}
 
 
-\begin{table}
-  \caption{Sample table title}
-  \label{sample-table}
-  \centering
-  \begin{tabular}{lll}
-    \toprule
-    \multicolumn{2}{c}{Part}                   \\
-    \cmidrule(r){1-2}
-    Name     & Description     & Size ($\mu$m) \\
-    \midrule
-    Dendrite & Input terminal  & $\sim$100     \\
-    Axon     & Output terminal & $\sim$10      \\
-    Soma     & Cell body       & up to $10^6$  \\
-    \bottomrule
-  \end{tabular}
+The log-likelihood is used to avoid numerical instability when encountering small numbers. In practical (Fig. \ref{fig:training-log}), the log-likelihood can be $10^{-14}$. 
+
+\subsection{Difference from the \cite{chandra2021bayesian}}
+
+In \cite{chandra2021bayesian}, the parallel tempering method is used to train the Bayesian neural network. The source code of \cite{chandra2019langevin} is implemented by NumPy and Multiprocessing. In this project, we are exploring one or several sampling methods and leveraging the just-in-time compilation (JIT) powered by JAX\cite{jax2018github}. The sampling process is compiled to machine code and can be moved to hardware acceleration such as GPU/TPU.
+
+
+\section{Results}
+
+\subsection{Suboptimal training with MALA}
+
+The iteration of $5\times 10^4$ is used to derive the posterior distribution. Each iteration yields $30$ samples to calculate the log-likelihood. The training log (Fig. \ref{fig:training-log}) shows that more iteration is needed to achieve a higher log-likelihood. 
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../img/training_MALA_50000-iter.pdf}
+        \caption{Training loss (likelihood).}
+        \label{fig:training-log}
+    \end{subfigure}%
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../img/prediction_MALA_50000-iter.pdf}
+        \caption{Prediction (training set)}
+        \label{fig:pred-sub}
+    \end{subfigure}
+    \caption{Training with MALA method. The training process took $30$ min on MacPro M1 Chip. (b) Prediction is made by sampling $30$ times. Each time series is plotted in semi-transparent gray. The mean and ground truth are plotted, respectively. (See \href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_fit_time_window.ipynb}{notebook} for implementation details.)}
+    \label{fig:pred}
+\end{figure}
+
+
+\bibliography{ref}
+
+
+\section{Supplemental Materials}
+
+\begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{cX}
+       \textbf{Resources} & \textbf{Description} \\
+       \hline
+       \href{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket}{Source code  of \cite{chandra2021bayesian}} & See primary paper\cite{chandra2021bayesian}. This paper applied langevin-gradient parallel tempering from \cite{chandra2019langevin} with stock data under the influences of COVID-19\\\hline
+       \href{https://github.com/sydney-machine-learning/parallel-tempering-neural-net}{Source code of \cite{chandra2019langevin}} & See secondary paper\cite{chandra2019langevin} that propose parallel computing of langevin gradient Monte Carlo for Bayesian neural network\\\hline
+        \href{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket/blob/master/code/datasets/raw/DAI.DE.csv}{Raw data}  & The original dataset with opened, closed, highest, lowest prices within a day. 1267 days recorded.  \\\hline
+       \href{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket/blob/master/code/datasets/600118.SS_1_train.txt}{Processed dataset}  & Filtered dataset. In \cite{chandra2021bayesian}, only one feature is used per day. Noted that the data is non-stationary  \\\hline
+       \href{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket/blob/6d24cf25115b6517e3099249bc657674f6b9b98f/code/pt_timeseries_regression.py\#L36-L142}{Bayesian framework} & The implementation is based on \texttt{NumPy}, and the parallel tempering is based on \texttt{multiprocess} package. The computation requires multiprocessing with CPUs.\\
+       \href{https://github.com/jamesvuc/jax-bayes}{Jax-Bayes} & Bayesian inference with Jax\cite{jax2018github}.\\\hline
+       \href{https://github.com/stevengogogo/ECEN649_FinalProject}{ECEN649\_FinalProject} & Project code and documentation
+    \end{tabularx}
+    \caption{Resources table.}
+    \label{tab:my_label}
 \end{table}
-
-
-\section{Final instructions}
-
-
-Do not change any aspects of the formatting parameters in the style files.  In
-particular, do not modify the width or length of the rectangle the text should
-fit into, and do not change font sizes (except perhaps in the
-\textbf{References} section; see below). Please note that pages should be
-numbered.
-
-
-\section{Preparing PDF files}
-
-
-Please prepare submission files with paper size ``US Letter,'' and not, for
-example, ``A4.''
-
-
-Fonts were the main cause of problems in the past years. Your PDF file must only
-contain Type 1 or Embedded TrueType fonts. Here are a few instructions to
-achieve this.
-
-
-\begin{itemize}
-
-
-\item You should directly generate PDF files using \verb+pdflatex+.
-
-
-\item You can check which fonts a PDF files uses.  In Acrobat Reader, select the
-  menu Files$>$Document Properties$>$Fonts and select Show All Fonts. You can
-  also use the program \verb+pdffonts+ which comes with \verb+xpdf+ and is
-  available out-of-the-box on most Linux machines.
-
-
-\item The IEEE has recommendations for generating PDF files whose fonts are also
-  acceptable for NeurIPS. Please see
-  \url{http://www.emfield.org/icuwb2010/downloads/IEEE-PDF-SpecV32.pdf}
-
-
-\item \verb+xfig+ "patterned" shapes are implemented with bitmap fonts.  Use
-  "solid" shapes instead.
-
-
-\item The \verb+\bbold+ package almost always uses bitmap fonts.  You should use
-  the equivalent AMS Fonts:
-\begin{verbatim}
-   \usepackage{amsfonts}
-\end{verbatim}
-followed by, e.g., \verb+\mathbb{R}+, \verb+\mathbb{N}+, or \verb+\mathbb{C}+
-for $\mathbb{R}$, $\mathbb{N}$ or $\mathbb{C}$.  You can also use the following
-workaround for reals, natural and complex:
-\begin{verbatim}
-   \newcommand{\RR}{I\!\!R} %real numbers
-   \newcommand{\Nat}{I\!\!N} %natural numbers
-   \newcommand{\CC}{I\!\!\!\!C} %complex numbers
-\end{verbatim}
-Note that \verb+amsfonts+ is automatically loaded by the \verb+amssymb+ package.
-
-
-\end{itemize}
-
-
-If your file contains type 3 fonts or non embedded TrueType fonts, we will ask
-you to fix it.
-
-
-\subsection{Margins in \LaTeX{}}
-
-
-Most of the margin problems come from figures positioned by hand using
-\verb+\special+ or other commands. We suggest using the command
-\verb+\includegraphics+ from the \verb+graphicx+ package. Always specify the
-figure width as a multiple of the line width as in the example below:
-\begin{verbatim}
-   \usepackage[pdftex]{graphicx} ...
-   \includegraphics[width=0.8\linewidth]{myfile.pdf}
-\end{verbatim}
-See Section 4.4 in the graphics bundle documentation
-(\url{http://mirrors.ctan.org/macros/latex/required/graphics/grfguide.pdf})
-
-
-A number of width problems arise when \LaTeX{} cannot properly hyphenate a
-line. Please give LaTeX hyphenation hints using the \verb+\-+ command when
-necessary.
-
-
-\begin{ack}
-Use unnumbered first level headings for the acknowledgments. All acknowledgments
-go at the end of the paper before the list of references. Moreover, you are required to declare
-funding (financial activities supporting the submitted work) and competing interests (related financial activities outside the submitted work).
-More information about this disclosure can be found at: \url{https://neurips.cc/Conferences/2022/PaperInformation/FundingDisclosure}.
-
-
-Do {\bf not} include this section in the anonymized submission, only in the final paper. You can use the \texttt{ack} environment provided in the style file to autmoatically hide this section in the anonymized submission.
-\end{ack}
-
-
-\section*{References}
-
-
-References follow the acknowledgments. Use unnumbered first-level heading for
-the references. Any choice of citation style is acceptable as long as you are
-consistent. It is permissible to reduce the font size to \verb+small+ (9 point)
-when listing the references.
-Note that the Reference section does not count towards the page limit.
-\medskip
-
-
-{
-\small
-
-
-[1] Alexander, J.A.\ \& Mozer, M.C.\ (1995) Template-based algorithms for
-connectionist rule extraction. In G.\ Tesauro, D.S.\ Touretzky and T.K.\ Leen
-(eds.), {\it Advances in Neural Information Processing Systems 7},
-pp.\ 609--616. Cambridge, MA: MIT Press.
-
-
-[2] Bower, J.M.\ \& Beeman, D.\ (1995) {\it The Book of GENESIS: Exploring
-  Realistic Neural Models with the GEneral NEural SImulation System.}  New York:
-TELOS/Springer--Verlag.
-
-
-[3] Hasselmo, M.E., Schnell, E.\ \& Barkai, E.\ (1995) Dynamics of learning and
-recall at excitatory recurrent synapses and cholinergic modulation in rat
-hippocampal region CA3. {\it Journal of Neuroscience} {\bf 15}(7):5249-5262.
-}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section*{Checklist}
-
-
-%%% BEGIN INSTRUCTIONS %%%
-The checklist follows the references.  Please
-read the checklist guidelines carefully for information on how to answer these
-questions.  For each question, change the default \answerTODO{} to \answerYes{},
-\answerNo{}, or \answerNA{}.  You are strongly encouraged to include a {\bf
-justification to your answer}, either by referencing the appropriate section of
-your paper or providing a brief inline description.  For example:
-\begin{itemize}
-  \item Did you include the license to the code and datasets? \answerYes{See Section~\ref{gen_inst}.}
-  \item Did you include the license to the code and datasets? \answerNo{The code and the data are proprietary.}
-  \item Did you include the license to the code and datasets? \answerNA{}
-\end{itemize}
-Please do not modify the questions and only use the provided macros for your
-answers.  Note that the Checklist section does not count towards the page
-limit.  In your paper, please delete this instructions block and only keep the
-Checklist section heading above along with the questions/answers below.
-%%% END INSTRUCTIONS %%%
-
-
-\begin{enumerate}
-
-
-\item For all authors...
-\begin{enumerate}
-  \item Do the main claims made in the abstract and introduction accurately reflect the paper's contributions and scope?
-    \answerTODO{}
-  \item Did you describe the limitations of your work?
-    \answerTODO{}
-  \item Did you discuss any potential negative societal impacts of your work?
-    \answerTODO{}
-  \item Have you read the ethics review guidelines and ensured that your paper conforms to them?
-    \answerTODO{}
-\end{enumerate}
-
-
-\item If you are including theoretical results...
-\begin{enumerate}
-  \item Did you state the full set of assumptions of all theoretical results?
-    \answerTODO{}
-        \item Did you include complete proofs of all theoretical results?
-    \answerTODO{}
-\end{enumerate}
-
-
-\item If you ran experiments...
-\begin{enumerate}
-  \item Did you include the code, data, and instructions needed to reproduce the main experimental results (either in the supplemental material or as a URL)?
-    \answerTODO{}
-  \item Did you specify all the training details (e.g., data splits, hyperparameters, how they were chosen)?
-    \answerTODO{}
-        \item Did you report error bars (e.g., with respect to the random seed after running experiments multiple times)?
-    \answerTODO{}
-        \item Did you include the total amount of compute and the type of resources used (e.g., type of GPUs, internal cluster, or cloud provider)?
-    \answerTODO{}
-\end{enumerate}
-
-
-\item If you are using existing assets (e.g., code, data, models) or curating/releasing new assets...
-\begin{enumerate}
-  \item If your work uses existing assets, did you cite the creators?
-    \answerTODO{}
-  \item Did you mention the license of the assets?
-    \answerTODO{}
-  \item Did you include any new assets either in the supplemental material or as a URL?
-    \answerTODO{}
-  \item Did you discuss whether and how consent was obtained from people whose data you're using/curating?
-    \answerTODO{}
-  \item Did you discuss whether the data you are using/curating contains personally identifiable information or offensive content?
-    \answerTODO{}
-\end{enumerate}
-
-
-\item If you used crowdsourcing or conducted research with human subjects...
-\begin{enumerate}
-  \item Did you include the full text of instructions given to participants and screenshots, if applicable?
-    \answerTODO{}
-  \item Did you describe any potential participant risks, with links to Institutional Review Board (IRB) approvals, if applicable?
-    \answerTODO{}
-  \item Did you include the estimated hourly wage paid to participants and the total amount spent on participant compensation?
-    \answerTODO{}
-\end{enumerate}
-
-
-\end{enumerate}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-\appendix
-
-
-\section{Appendix}
-
-
-Optionally include extra information (complete proofs, additional experiments and plots) in the appendix.
-This section will often be part of the supplemental material.
 
 
 \end{document}

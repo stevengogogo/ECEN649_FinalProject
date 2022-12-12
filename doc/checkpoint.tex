@@ -15,7 +15,7 @@
 
 
 \begin{abstract}
-The randomness of the stock market challenge investments to be reliable. Many approaches have been introduced to find the hidden pattern behind the transitions. However, error estimation with the non-parametric method is in the early stage. In this project, we used a Bayesian neural network to predict discrete  time-series data with a moving window of the kernel. The Monte Carlo Markov Chain method is applied to measure the posterior distribution. The purpose is to provide a model-free approach with uncertainty quantification that is essential to the investment strategy. 
+The randomness of the stock market challenge investments to be reliable. Many approaches have been introduced to find the hidden pattern behind the transitions. However, error estimation with the non-parametric method is in the early stage. In this project, we used a Bayesian neural network to predict discrete  time-series data with Taken's embedding theorem. The Langevin Monte Carlo Markov Chain method is applied to measure the posterior distribution. The purpose of this project is to provide a model-free approach with uncertainty quantification that is essential to the investment strategy. 
 \end{abstract}
 
 \section{Introduction}
@@ -28,7 +28,7 @@ The randomness of the stock market challenge investments to be reliable. Many ap
 % Things to write: Feedforward Neural Network with Parallel Tempering MCMC
 % Dataset : time-series
 
-Bayesian learning offers an intuitive method to estimate uncertainty and parameter quantification that is crucial for the stock market.  In this project, we will re-implement the Bayesian neural network to predict the stock price before and after COVID-19 prevalence \cite{chandra2021bayesian}. 
+Bayesian learning offers an intuitive method to estimate uncertainty and parameter quantification that is crucial for the stock market.  In this project, we reimplemented the Bayesian neural network to predict the stock price before and after COVID-19 prevalence \cite{chandra2021bayesian}. 
 
 % With Bayesian learning first introduced to neural networks recently, it provides better model uncertainty quantification compared to classical neural networks.
 
@@ -38,17 +38,16 @@ Bayesian learning offers an intuitive method to estimate uncertainty and paramet
 The impact of COVID-19 spreading on the stock price of a company in a country is predicted via Bayesian neural network with parallel tempering MCMC sampling\cite{chandra2021bayesian, chandra2019langevin} with uncertainty estimation. In \cite{chandra2021bayesian}, the prediction is made by the historical stock prices of a given country, which loses the information from other countries impacted by COVID-19 earlier. 
 %Also,\href{https://twiecki.io/blog/2018/08/13/hierarchical_bayesian_neural_network/}{the hierarchical Bayesian method} provides an intuitive approach for pooling nested data, and allows group information to be shared and formulate a general model. 
 
-\paragraph{Our goal} is to pool the information from the stock markets of four different companies to estimate the stock dynamics of the target company with \textit{Bayesian neural network}. The pooled Bayesian neural network will be used as the informative prior of the target market stock. %In the end, four in-group Bayesian neural networks will be marginalized via within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data, and potentially improve prediction with augmented information.
+\paragraph{Our goal} is to apply alternative sampling methods, such as Langevin MCMC or Hamiltonian MCMC, other than \cite{chandra2019langevin}, and predict the time-series data with Bayesian neural network. The pooled Bayesian neural network will be used as the informative prior of the target market stock. On the other hand, we introduce the just-in-time compilation (JIT), and automatic differentiation for Langevin Monte Carlo approaches with \textit{JAX}\cite{jax2018github} to compare the original method built by \textit{NumPy} and \textit{Multiprocessing}\cite{chandra2021bayesian}. %In the end, four in-group Bayesian neural networks will be marginalized via within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data, and potentially improve prediction with augmented information.
 
 
 
 \section{Methods}
 
 
-
 \subsection{Dataset}
 
-\paragraph{The dataset} contains the closing price per day for 4 stocks in 4 countries (Table \ref{tab:my_label}). These discrete time-series data is processed by normalization ($x_{i}' = \frac{x_{i} - x_{\min}}{x_{\max} - x_{\min}}$). The dataset is labeled by two timeframes: before and during COVID-19. Suppose the closing stock price is $[x_1, \dots, x_N]$ where $N$ is the length of the time series. The purpose is to predict the time series after the first few days of COVID-19 spreading.
+The stock dataset contains the closing price per day for 4 stocks in 4 countries (Table \ref{tab:my_label}). These discrete time-series data is processed by normalization ($x_{i}' = \frac{x_{i} - x_{\min}}{x_{\max} - x_{\min}}$). The dataset is labeled by two timeframes: before and during COVID-19 (Fig. \ref{fig:data-series}). Suppose the closing stock price is $[x_1, \dots, x_N]$ where $N$ is the length of the time series. The purpose is to predict the time series (prediction horizon) after the first few days (capture window).
 
 
 
@@ -60,7 +59,8 @@ The original data set is $x_t = \{x_{1}, ..., x_{Total}\}$, the training input i
     x_{1+(t-1)T} & \cdots & x_{m+(t-1)T}\\
     x_{3+(t-1)T} & \cdots & x_{m+3+(t-1)T}\\
     \vdots & \vdots & \vdots 
-\end{bmatrix}}_{\text{m(Capture windows)}}
+\end{bmatrix}}_{\text{m (Capture windows)}}
+\label{eq:window}
 \end{equation}
 
 \begin{equation}
@@ -70,6 +70,7 @@ y_t =
     x_{m+3+(t-1)T + 1} & \cdots & x_{m+3+(t-1)T+ n}\\
     \vdots & \vdots & \vdots
 \end{bmatrix}}_{\text{n (Prediction Horizons)}}
+\label{eq:ywindow}
 \end{equation}
 
 
@@ -96,10 +97,12 @@ y_t =
          \includegraphics[width=\textwidth]{../img/MMM_covid_test.pdf}
          \caption{Test set during COVID-19}
      \end{subfigure}
-    \caption{Stock markets of a company before and during COVID-19 \cite{chandra2021bayesian} (\href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_data_visualization.ipynb}{source code}). The training set and testing set is recorded from different time frame. The objective of \cite{chandra2021bayesian} is to fit each dataset with the same pipeline.}
+    \caption{Stock markets of a company before and during COVID-19 \cite{chandra2021bayesian} (\href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_data_visualization.ipynb}{source code}). The training set and testing set is recorded from the different time frame. The objective of \cite{chandra2021bayesian} is to fit each dataset with the same pipeline.}
     \label{fig:data-series}
 \end{figure}
 
+
+The state-space reconstruction is based on Taken's embedding theorem that guarantees the embedding time series (Eq. \ref{eq:window}) retains the manifold of the original dynamics\cite{takens1981detecting}.
 
 \subsection{Framework}
 
@@ -108,7 +111,7 @@ The sequential neural network with one hidden layer is used for the regression p
 The implementation is based on \textit{Haiku} \cite{haiku2020github}, a neural network library with \textit{JAX} backend \cite{jax2018github}.
 
 
-The input dimension is equal to the window size ($m$, Eq. \ref{eq:wd}), and the output dimension corresponds to the prediction horizon (). The hidden layer contains 128 nodes. In practice, the properties of the Bayesian neural networks are saved with standard fixed-point neural networks and sampled parameters.
+The input dimension is equal to the window size ($m$, Eq. \ref{eq:window}), and the output dimension corresponds to the prediction horizon ($n$, Eq. \ref{eq:ywindow}). The hidden layer contains 128 nodes. In practice, the properties of the Bayesian neural networks are saved with standard fixed-point neural networks and sampled parameters.
 
 
 \subsection{Training}

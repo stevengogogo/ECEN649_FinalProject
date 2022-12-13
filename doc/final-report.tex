@@ -91,6 +91,7 @@ y_t =
          \centering
          \includegraphics[width=\textwidth]{../img/MMM8_train.pdf}
          \caption{Train set (before COVID-19)}
+         \label{fig:mm8-train}
      \end{subfigure}%
      \begin{subfigure}[b]{0.5\textwidth}
          \centering
@@ -259,18 +260,18 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
     \caption{Training with Langevin Monte Carlo Sampling.}
 \end{figure}
 
-\subscection{Model Size}
+\subsection{Model Size}
  
 \begin{figure}
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../img/training_Langevin_200000_128.png}
-        \caption{Training log of tanh activation}
+        \caption{Training with Langevin Monte Carlo Sampling}
     \end{subfigure}\hfill
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
         \includegraphics[trim={0 0 0 0.7cm}, clip, width=\textwidth]{../img/prediction_Langevin_200000_128.png}
-        \caption{Prediction of tanh activation}
+        \caption{Prediction with Langevin Monte Carlo Sampling}
     \end{subfigure}
     \caption{Training with neural network with hidden layer of 128 nodes.}
 \end{figure}
@@ -279,8 +280,15 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
 
 \subsection{The independence of dataset is questionable?}
 
-In \cite{chandra2021bayesian}, the log likelihood is applied to find the best distribution of posterior. The likelihood $p(D|W)$ is the product of all I.I.D. experiments
+In \cite{chandra2021bayesian}, the log likelihood is applied to find the best distribution of posterior. The likelihood $p(D|W)$ is the product of all i.i.d. experiments.
 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{../img/autocorrelation.pdf}
+    \caption{Autocorrelation of the stock market signal (Fig. \ref{fig:mm8-train})}
+    \label{fig:auto}
+\end{figure}
 
 \bibliography{ref}
 
@@ -317,6 +325,9 @@ If the model produces Guassian prediction ($\hat{y} \sim Normal(\mu_D, \sigma^{2
 
 
 \subsection{Example Notebook}
+
+The experiments are made and recorded in Jupyter notebooks. The following is an printout of an example that uses Langevin Monte Carlo for training the Bayesian neural network proposed in \cite{chandra2021bayesian}. This notebook is available on Google Colab\footnote{Notebook on Colab: \url{https://colab.research.google.com/drive/19yguqrHEPuBiJjGrUHsA5NMybO7q32RP?usp=sharing}} with GPU acceleration.
+
 
 \includepdf[pages=-,width=\textwidth]{../img/Sigmoid_EXP_fit_time_window.pdf}
 

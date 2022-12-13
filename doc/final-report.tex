@@ -39,17 +39,17 @@ The randomness of the stock market challenge investments to be reliable. Many ap
 % Things to write: Feedforward Neural Network with Parallel Tempering MCMC
 % Dataset : time-series
 
-Bayesian learning offers an intuitive method to estimate uncertainty and parameter quantification that is crucial for the stock market.  In this project, we reimplemented the Bayesian neural network to predict the stock price before and after COVID-19 prevalence \cite{chandra2021bayesian}. 
+Bayesian learning offers an intuitive method to estimate uncertainty and parameter quantification that is crucial for the stock market.  In this project, we reimplemented the Bayesian neural network to predict the stock price before and after COVID-19 prevalence \citep{chandra2021bayesian}. 
 
 % With Bayesian learning first introduced to neural networks recently, it provides better model uncertainty quantification compared to classical neural networks.
 
-%Our goal is to combine the Bayesian neural network with different techniques such as autoregressive integrated moving average (ARIMA) \cite{Rathnayaka2015AHS}. Furthermore, to accelerate the overall prediction time, we can adopt the an automatic differential equation with delay DE.
+%Our goal is to combine the Bayesian neural network with different techniques such as autoregressive integrated moving average (ARIMA) \citep{Rathnayaka2015AHS}. Furthermore, to accelerate the overall prediction time, we can adopt the an automatic differential equation with delay DE.
 
 
-The impact of COVID-19 spreading on the stock price of a company in a country is predicted via Bayesian neural network with parallel tempering MCMC sampling\cite{chandra2021bayesian, chandra2019langevin} with uncertainty estimation. In \cite{chandra2021bayesian}, the prediction is made by the historical stock prices of a given country, which loses the information from other countries impacted by COVID-19 earlier. 
+The impact of COVID-19 spreading on the stock price of a company in a country is predicted via Bayesian neural network with parallel tempering MCMC sampling\citep{chandra2021bayesian, chandra2019langevin} with uncertainty estimation. In \cite{chandra2021bayesian}, the prediction is made by the historical stock prices of a given country, which loses the information from other countries impacted by COVID-19 earlier. 
 %Also,\href{https://twiecki.io/blog/2018/08/13/hierarchical_bayesian_neural_network/}{the hierarchical Bayesian method} provides an intuitive approach for pooling nested data, and allows group information to be shared and formulate a general model. 
 
-\paragraph{Our goal} is to apply alternative sampling methods, such as Langevin MCMC or Hamiltonian MCMC, other than \cite{chandra2019langevin}, and predict the time-series data with Bayesian neural network. The pooled Bayesian neural network will be used as the informative prior of the target market stock. On the other hand, we introduce the just-in-time compilation (JIT), and automatic differentiation for Langevin Monte Carlo approaches with \textit{JAX}\cite{jax2018github} to compare the original method built by \textit{NumPy} and \textit{Multiprocessing}\cite{chandra2021bayesian}. %In the end, four in-group Bayesian neural networks will be marginalized via within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data, and potentially improve prediction with augmented information.
+\paragraph{Our goal} is to apply alternative sampling methods, such as Langevin MCMC or Hamiltonian MCMC, other than \citep{chandra2019langevin}, and predict the time-series data with Bayesian neural network. The pooled Bayesian neural network will be used as the informative prior of the target market stock. On the other hand, we introduce the just-in-time compilation (JIT), and automatic differentiation for Langevin Monte Carlo approaches with \textit{JAX}\citep{jax2018github} to compare the original method built by \textit{NumPy} and \textit{Multiprocessing}\citep{chandra2021bayesian}. %In the end, four in-group Bayesian neural networks will be marginalized via within-group data and combined into a global model. Noted that each framework can achieve its own task, but the information is shared with each group. The hierarchical Bayesian approach can overcome \href{https://www.pnas.org/doi/10.1073/pnas.1611835114#sec-3}{catastrophic forgetting in the neural networks} (old weights get overwritten) by sharing the higher-order representation informed by groups of data, and potentially improve prediction with augmented information.
 
 
 
@@ -109,18 +109,18 @@ y_t =
          \includegraphics[width=\textwidth]{../img/MMM_covid_test.pdf}
          \caption{Test set during COVID-19}
      \end{subfigure}
-    \caption{Stock markets of a company before and during COVID-19 \cite{chandra2021bayesian} (\href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_data_visualization.ipynb}{source code}). The training set and testing set is recorded from the different time frame. The objective of \cite{chandra2021bayesian} is to fit each dataset with the same pipeline.}
+    \caption{Stock markets of a company before and during COVID-19 \citep{chandra2021bayesian} (\href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_data_visualization.ipynb}{source code}). The training set and testing set is recorded from the different time frame. The objective of \citep{chandra2021bayesian} is to fit each dataset with the same pipeline.}
     \label{fig:data-series}
 \end{figure}
 
 
-The state-space reconstruction is based on Taken's embedding theorem that guarantees the embedding time series (Eq. \ref{eq:window}) retains the manifold of the original dynamics\cite{takens1981detecting}.
+The state-space reconstruction is based on Taken's embedding theorem that guarantees the embedding time series (Eq. \ref{eq:window}) retains the manifold of the original dynamics\citep{takens1981detecting}.
 
 \subsection{Framework}
 
 The sequential neural network with one hidden layer is used for the regression problem. The activation function is $\tanh$\footnote{Notebooks and source code is provided at \url{https://github.com/stevengogogo/ECEN649_FinalProject}.}.
 
-The implementation is based on \textit{Haiku} \cite{haiku2020github}, a neural network library with \textit{JAX} backend \cite{jax2018github}.
+The implementation is based on \textit{Haiku} \citep{haiku2020github}, a neural network library with \textit{JAX} backend \citep{jax2018github}.
 
 
 The input dimension is equal to the window size ($m$, Eq. \ref{eq:window}), and the output dimension corresponds to the prediction horizon ($n$, Eq. \ref{eq:ywindow}). The hidden layer contains 128 nodes. In practice, the properties of the Bayesian neural networks are saved with standard fixed-point neural networks and sampled parameters.
@@ -152,9 +152,9 @@ The output of a neural network function is
     \label{eq:net-output}
 \end{equation}
 
-where $W$ is the random vector of weights of a neural network, $\hat{y}$ the predicted value, and $f$ the function of the neural network.
+where $\theta$ is the random vector of weights of a neural network, $\hat{y}$ the predicted value, and $f$ the function of the neural network.
 
-Because the weights ($W$) have Normal prior (Eq. \ref{eq:weight-prior}),  the likelihood of the target value ($y$) is 
+Because the weights ($\theta$) have Normal prior (Eq. \ref{eq:weight-prior}),  the likelihood of the target value ($y$) is 
 
 \begin{equation}
     p(y|\hat{y}) = \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(y-\hat{y})^2}{2\sigma^2}}
@@ -169,7 +169,7 @@ Thus, the likelihood is a Gaussian distribution with network output ($\hat{y}$) 
 \end{equation}
 
 
-To find the most probable wight vector ($W$, Eq. \ref{eq:net-output}), the Maximum a Posteriori (MAP) is applied to \textit{maximize} the log-likelihood (Eq. \ref{eq:log-likelihood}). Because $\log$ (Eq. \ref{eq:likelihood}) is a monotonous function, the maximization of posterior can be achieved by maximizing the sum. From Eq. \ref{eq:bayes}, 
+To find the most probable wight vector ($\theta$, Eq. \ref{eq:net-output}), the Maximum a Posteriori (MAP) is applied to \textit{maximize} the log-likelihood (Eq. \ref{eq:log-likelihood}). Because $\log$ (Eq. \ref{eq:likelihood}) is a monotonous function, the maximization of posterior can be achieved by maximizing the sum. From Eq. \ref{eq:bayes}, 
 
 \begin{align}
     p(\theta|D) &= p(\theta) p(D|\theta) / p(D)\\
@@ -190,22 +190,23 @@ where $D$ is the sampled dataset from sample space $\mathbb{D}$. From Eq. \ref{e
 
 \subsection{Approximation of Posterior Distribution by Monte Carlo Approaches}
 
-Because there is no closed form of the posterior distribution, a Metropolis-adjusted Langevin algorithm (MALA) is applied to approximate the posterior probability density, and the gradient of probability is calculated via automatic differentiation. The Langevin algorithm provides a better acceptance rate compared to the naive Metropolis-hasting algorithm\cite{roberts1998optimal}. 
+Because there is no closed form of the posterior distribution, a Metropolis-adjusted Langevin algorithm (MALA)\citep{roberts1998optimal}, Unadjusted Langevin Algorithm\citep{durmus2019high} and Hamiltonian Monte Carlo\citep{neal1996} are applied to approximate the posterior probability density, and the gradient of probability is calculated via automatic differentiation. The Langevin algorithm provides a better acceptance rate compared to the naive Metropolis-hasting algorithm\citep{roberts1998optimal}. 
 
 The sampling process is divided into three steps:
 
 \begin{enumerate}
     \item \textbf{Initiation} The initiation step uses the prior distribution to sample initial parameters.
-    \item \textbf{Proposal} The proposed step uses proposal distribution to generate a  parameter set. This step is optimized by a variety of approaches\cite{jospin2022a}: Hamiltonian Monte Carlo\cite{neal1996, neal2011}, MALA, and other gradient-based methods provide \textit{smart} sampling to yield better mixing and acceptance rate. These approaches are available at \textit{jax-bayes} package\footnote{https://github.com/jamesvuc/jax-bayes}. In MALA, the stochastic differential equation is solved to generate a new state. This approach is inspired by the physical diffusion and has an optimal acceptance rate $0.574$\cite{roberts1998optimal}.
+    \item \textbf{Proposal} The proposed step uses proposal distribution to generate a  parameter set. This step is optimized by a variety of approaches\citep{jospin2022a}: Hamiltonian Monte Carlo\citep{neal1996, neal2011}, MALA, and other gradient-based methods provide \textit{smart} sampling to yield better mixing and acceptance rate. These approaches are available at \textit{jax-bayes} package\footnote{https://github.com/jamesvuc/jax-bayes}. In MALA, the stochastic differential equation is solved to generate a new state. This approach is inspired by the physical diffusion and has an optimal acceptance rate $0.574$\citep{roberts1998optimal}.
     \item \textbf{Update} The generated sample is decided to accept or reject with the ratio of the probability of current and proposed states. Though the ratio is measured with different methods, the purpose is to avoid integrating the marginal probability of posterior distribution.
 \end{enumerate}
 
 
 The log-likelihood is used to avoid numerical instability when encountering small numbers. In practical (Fig. \ref{fig:training-log}), the log-likelihood can be $10^{-14}$. 
 
-\subsection{Difference from the \cite{chandra2021bayesian}}
+\subsection{Difference from the \citep{chandra2021bayesian}}
 
-In \cite{chandra2021bayesian}, the parallel tempering method is used to train the Bayesian neural network. The source code of \cite{chandra2019langevin} is implemented by NumPy and Multiprocessing. In this project, we are exploring one or several sampling methods and leveraging the just-in-time compilation (JIT) powered by JAX\cite{jax2018github}. The sampling process is compiled to machine code and can be moved to hardware acceleration such as GPU/TPU.
+In \cite{chandra2021bayesian}, the parallel tempering method is used to train the Bayesian neural network. The source code of \citep{chandra2019langevin} is implemented by NumPy and Multiprocessing. In this project, we are exploring one or several sampling methods and leveraging the just-in-time compilation (JIT) powered by JAX\citep{jax2018github}. The sampling process is compiled to machine code and can be moved to hardware acceleration such as GPU/TPU.
+
 
 
 \section{Results}
@@ -228,7 +229,7 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
         \caption{Prediction (training set)}
         \label{fig:pred-sub}
     \end{subfigure}
-    \caption{Training with MALA method. The training process took $30$ min on MacPro M1 Chip. (b) Prediction is made by sampling $30$ times. Each time series is plotted in semi-transparent gray. The mean and ground truth are plotted, respectively. (See \href{https://github.com/stevengogogo/ECEN649_FinalProject/blob/main/script/EXP_fit_time_window.ipynb}{notebook} for implementation details.)}
+    \caption{Training with MALA method. The training process took $30$ min on MacPro M1 Chip. (b) Prediction is made by sampling $30$ times. Each time series is plotted in semi-transparent gray. The mean and ground truth are plotted, respectively. (See Sec. \ref{sec:notebook} for implementation details.)}
     \label{fig:pred}
 \end{figure}
 
@@ -258,6 +259,24 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
         \caption{Prediction of tanh activation}
     \end{subfigure}
     \caption{Training with Langevin Monte Carlo Sampling.}
+\end{figure}
+
+
+\subsection{HMC failed to find the posterior distribution}
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{../img/training_HMC_400000_iter.png}
+        \caption{Training log of sigmoid activation}
+    \end{subfigure}\hfill
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[trim={0 0 0 0.7cm}, clip, width=\textwidth]{../img/prediction_HMC_400000_iter.png}
+        \caption{Prediction of sigmoid activation}
+    \end{subfigure}
+    \caption{Training with Hamiltonian Monte Carlo Sampling.}
 \end{figure}
 
 \subsection{Model Size}
@@ -302,12 +321,12 @@ In \cite{chandra2021bayesian}, the log likelihood is applied to find the best di
     \begin{tabularx}{\textwidth}{cX}
        \textbf{Resources} & \textbf{Description} \\
        \hline
-       \href{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket}{Source code  of \cite{chandra2021bayesian}} & See primary paper\cite{chandra2021bayesian}. This paper applied langevin-gradient parallel tempering from \cite{chandra2019langevin} with stock data under the influences of COVID-19\\\hline
-       \href{https://github.com/sydney-machine-learning/parallel-tempering-neural-net}{Source code of \cite{chandra2019langevin}} & See secondary paper\cite{chandra2019langevin} that propose parallel computing of langevin gradient Monte Carlo for Bayesian neural network\\\hline
+       \href{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket}{Source code  of \citep{chandra2021bayesian}} & See primary paper\citep{chandra2021bayesian}. This paper applied langevin-gradient parallel tempering from \citep{chandra2019langevin} with stock data under the influences of COVID-19\\\hline
+       \href{https://github.com/sydney-machine-learning/parallel-tempering-neural-net}{Source code of \citep{chandra2019langevin}} & See secondary paper\citep{chandra2019langevin} that propose parallel computing of langevin gradient Monte Carlo for Bayesian neural network\\\hline
         \href{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket/blob/master/code/datasets/raw/DAI.DE.csv}{Raw data}  & The original dataset with opened, closed, highest, lowest prices within a day. 1267 days recorded.  \\\hline
        \href{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket/blob/master/code/datasets/600118.SS_1_train.txt}{Processed dataset}  & Filtered dataset. In \cite{chandra2021bayesian}, only one feature is used per day. Noted that the data is non-stationary  \\\hline
        \href{https://github.com/sydney-machine-learning/Bayesianneuralnet_stockmarket/blob/6d24cf25115b6517e3099249bc657674f6b9b98f/code/pt_timeseries_regression.py\#L36-L142}{Bayesian framework} & The implementation is based on \texttt{NumPy}, and the parallel tempering is based on \texttt{multiprocess} package. The computation requires multiprocessing with CPUs.\\\hline
-       \href{https://github.com/jamesvuc/jax-bayes}{Jax-Bayes} & Bayesian inference with Jax\cite{jax2018github}.\\\hline
+       \href{https://github.com/jamesvuc/jax-bayes}{Jax-Bayes} & Bayesian inference with Jax\citep{jax2018github}.\\\hline
        \href{https://github.com/stevengogogo/ECEN649_FinalProject}{ECEN649\_FinalProject} & Project code and documentation
     \end{tabularx}
     \caption{Resources table.}
@@ -324,7 +343,7 @@ If the model produces Guassian prediction ($\hat{y} \sim Normal(\mu_D, \sigma^{2
 \end{equation}
 
 
-\subsection{Example Notebook}
+\subsection{Example Notebook\label{sec:notebook}}
 
 The experiments are made and recorded in Jupyter notebooks. The following is an printout of an example that uses Langevin Monte Carlo for training the Bayesian neural network proposed in \cite{chandra2021bayesian}. This notebook is available on Google Colab\footnote{Notebook on Colab: \url{https://colab.research.google.com/drive/19yguqrHEPuBiJjGrUHsA5NMybO7q32RP?usp=sharing}} with GPU acceleration.
 

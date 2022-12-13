@@ -26,7 +26,7 @@
 
 
 \begin{abstract}
-The randomness of the stock market challenge investments to be reliable. Many approaches have been introduced to find the hidden pattern behind the transitions. However, error estimation with the non-parametric method is in the early stage. In this project, we used a Bayesian neural network to predict discrete  time-series data with Taken's embedding theorem. The Langevin Monte Carlo Markov Chain method is applied to measure the posterior distribution. The purpose of this project is to provide a model-free approach with uncertainty quantification that is essential to the investment strategy. 
+The randomness of the stock market challenge investments to be reliable. Many approaches have been introduced to find the hidden pattern behind the transitions. However, error estimation with the non-parametric method is in the early stage. In this project, we used a Bayesian neural network to predict discrete  time-series data with Taken's embedding theorem. In this project, The Unadjusted Langevin Monte Carlo, Metropolis-adjusted Langevin algorithm (MALA) and Hamiltonian Monte Carlo (HMC) are applied to measure the posterior distribution. We found that Langevin method performed best for the log likelihood optimization. The purpose of this project is to provide a model-free approach with uncertainty quantification that is essential to the investment strategy. 
 \end{abstract}
 
 \section{Introduction}
@@ -315,9 +315,19 @@ The model size is not proportional to the log likelihood. In Fig. \ref{fig:big-n
 The Hamiltonian Monte Carlo is a classic sampling method for Bayesian neural network\citep{neal1996}, that is inspired by the Hamiltonian mechanics. In pratical, this method requires fine-tuning of two parameters: leapfrog step and iterations. As shown in Fig. \ref{training-log-HMC}, the log likelihood is poorly found. This may due to ill-defined parameter setting of leapfrog and sampling iterations, and finding appropriate parameter setting is the difficult part of Hamiltonian Monte Carlo. Notebly, No-U-Turn sampler modified HMC and does not require the parameter tuning\citep{hoffman2014no}. The Langevin method seems more suitable for this model (Fig. \ref{fig:training-log-lagevin}) with the proposed setting (Sec. \ref{sec:notebook}). However, the solid conclusion requires the exploration of parameter setting of leapfrog and iterations.
 
 
-\subsection{Token's embedding method introduces dependence in dataset }
+\subsection{Token's embedding method introduces correlation in dataset }
 
-In \cite{chandra2021bayesian}, the log likelihood is applied to find the best distribution of posterior. The likelihood $p(D|W)$ is the product of all i.i.d. experiments (Eq, \ref{eq:likelihood}). The autocorrelation is one concerned when applying log likelihood (Eq. \ref{eq:log-likelihood}). As shown in Fig. \ref{fig:auto}, the stock market signal is autocorrelated, and that introuces correlation in dataset matrix (Eq. \ref{eq:window}). In the case of correlated sampling of $x$, the log likelihood may not be simply the product of all trials. 
+In \cite{chandra2021bayesian}, the log likelihood is applied to find the best distribution of posterior. The likelihood $p(D|\theta)$ is the product of all i.i.d. experiments (Eq, \ref{eq:likelihood}). The autocorrelation is one concerned when applying log likelihood (Eq. \ref{eq:log-likelihood}). As shown in Fig. \ref{fig:auto}, the stock market signal is autocorrelated, and that introduces correlation in dataset matrix (Eq. \ref{eq:window}). In the case of correlated sampling of $x$, the log likelihood may not be simply the product of all trials. The violated i.i.d. assumption can change the posterior distribution, and the correlation problem is not discussed in \cite{chandra2021bayesian}.
+
+\subsection{Jax implementation provides compiled script and hardware acceleration compared to the original implementation}
+
+Inspired by the source code of \cite{chandra2021bayesian}, we leveraged the acceleration of Jax library \citep{jax2018github}. In Sec. \ref{sec:notebook}, the \textit{@jax.jit} decorator can convert the python function into compiled machine code and speed up the for-loop (more example are shown in Sec. \ref{sec:notebook}). On the other hand, the automatic differential equation is another advantage to use Jax, that produces differential type of function from the customized function. This feature is essential for the speed of gradient-based sampling that used in this project. 
+
+The source code of \cite{chandra2021bayesian} is coded in \textit{NumPy} and \textit{Multiprocessing}. This setting is limited to the parallel processing in CPU. The Jax implementation enables the hardware acceleration via GPU/TPU. The GPU acceleration via \textit{NVIDIA Tesla T4} roughly provides three times acceleration compared to training on single core CPU. Though the re-implementation provides heuristic trials of Unadjusted Langevin, MALA and HMC, the novel multiple tempering method proposed \citep{chandra2019langevin} is not tested as reference.
+
+\cite{chandra2021bayesian} uses $10000$ sample number to generate the result, and the sampling method tried in this project requires 10 times of iterations. This shows that the proper design of sampler is crucial for Bayesian neural network approach.
+
+
 
 
 

@@ -2,6 +2,7 @@
 
 \usepackage{tabularx}
 \usepackage{pdfpages}
+\usepackage{float}
 \input{setup/final-report}
 \input{setup/author}
 
@@ -175,7 +176,7 @@ To find the most probable wight vector ($\theta$, Eq. \ref{eq:net-output}), the 
 
 \begin{align}
     p(\theta|D) &= p(\theta) p(D|\theta) / p(D)\\
-    \log(p(\theta|D)) &= \underbrace{\log(p(\theta))}_{\text{Log. prob. under prior}} + \underbrace{\log(p(D|\theta))}_{log. likelihood} - \underbrace{\log(p(D))}_{\text{log marginal probability of } D \text{(ignorable)}}\label{eq:log-sums}
+    \log(p(\theta|D)) &= \underbrace{\log(p(\theta))}_{\text{Log. prob. under prior}} + \underbrace{\log(p(D|\theta))}_{\text{log likelihood}} - \underbrace{\log(p(D))}_{\text{log marginal probability of } D \text{(ignorable)}}\label{eq:log-sums}
 \end{align}
 
 The logarithm of posterior distribution is related to the log probability and log likelihood. Noted that the log marginal probability of $D$ is ignorable because it is a constant and independent of $\theta$. This ignorance can bypass the necessity of integration over the distribution.
@@ -338,6 +339,9 @@ The source code of \cite{chandra2021bayesian} is coded in \textit{NumPy} and \te
     \label{fig:auto}
 \end{figure}
 
+\section{Summary}
+
+In this project, we applied three different sampler with Bayesian neural network with one hidden layer. The Token's embedding theorem is also applied to recover the stock market signal with error estimation. We also focused on the log likelihood of each method, and unadjusted Langevin method performed best among the three. The results suggest that unadjusted Langevin method is suitable for high dimensional sampling problem, and provides good convergence. In re-implementation, we introduced the Jax ecosystem for just-in-time compilation, automatic differentiation, and brought GPU acceleration into the play. This project may shed an light on practical sampling method of applying Bayesian neural network on time-series recovery.
 
 \bibliography{ref}
 
@@ -346,7 +350,7 @@ The source code of \cite{chandra2021bayesian} is coded in \textit{NumPy} and \te
 
 \subsection{Github Repositories and Dataset}
 
-\begin{table}[h]
+\begin{table}[H]
     \centering
     \begin{tabularx}{\textwidth}{cX}
        \textbf{Resources} & \textbf{Description} \\

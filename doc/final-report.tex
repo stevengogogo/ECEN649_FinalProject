@@ -64,6 +64,8 @@ The stock dataset contains the closing price per day for 4 stocks in 4 countries
 
 The original data set is $x_t = \{x_{1}, ..., x_{Total}\}$, the training input is a matrix with dimension $m \times s$ (where m is the capture window, and $s$ is the number of samples). The sample is produced by shifting the original time series with a lag of $2$.  These discrete time-series data is processed by normalization ($x_{i}' = \frac{x_{i} - x_{\min}}{x_{\max} - x_{\min}}$). 
 
+In this project, we used \textsc{MMM8} training set (Fig. \ref{fig:mm8-train}) for testing multiple Monte Carlo sampling methods for approximating the posterior distribution.
+
 \begin{equation}
 \bar{x}_t = 
 \underbrace{\begin{bmatrix}
@@ -85,7 +87,7 @@ y_t =
 \end{equation}
 
 
-\begin{figure}
+\begin{figure}[h]
      \centering
      \begin{subfigure}[b]{0.5\textwidth}
          \centering
@@ -182,7 +184,7 @@ The logarithm of posterior distribution is related to the log probability and lo
 Assuming data is independently and identical distributed (i.i.d.), the log-likelihood is computed by the product of the likelihood of all trials (Eq. \ref{eq:sum-log}).
 
 \begin{equation}
-    P(D|W) = \prod_{i\in \mathbb{D}} p(y_i | W) = \prod_{i \in \mathbb{D}} p(y_i | f(x, W))
+    P(D|\theta) = \prod_{i\in \mathbb{D}} p(y_i | \theta) = \prod_{i \in \mathbb{D}} p(y_i | f(x, \theta))
 \label{eq:sum-log}
 \end{equation}
 
@@ -229,12 +231,13 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
         \caption{Prediction (training set)}
         \label{fig:pred-sub}
     \end{subfigure}
-    \caption{Training with MALA method. The training process took $30$ min on MacPro M1 Chip. (b) Prediction is made by sampling $30$ times. Each time series is plotted in semi-transparent gray. The mean and ground truth are plotted, respectively. (See Sec. \ref{sec:notebook} for implementation details.)}
+    \caption{Training with MALA method\citep{roberts1998optimal}. The training process took $30$ min on MacPro M1 Chip. (b) Prediction is made by sampling $30$ times. Each time series is plotted in semi-transparent gray. The mean and ground truth are plotted, respectively. (See Sec. \ref{sec:notebook} for implementation details.)}
     \label{fig:pred}
 \end{figure}
 
-\subsection{Sampling methods and likelihood}
+\subsection{Suboptimal training with Langevin}
 
+The iteration of $2\times 10^5$ is used to derive the posterior distribution. Each iteration yields $30$ samples to calculate the log-likelihood. The training log (Fig. \ref{fig:training-log-lagevin}) reaches the optimal value of log-likelihood after $2\times 10^5$ times. Noted that the performance is better when choosing sigmoid function as our activation function than tanh function (Fig. \ref{fig:prediction-sigmoid}, \ref{fig:prediction-tanh}).
 
 \begin{figure}[h]
     \centering
@@ -242,11 +245,13 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
         \centering
         \includegraphics[width=\textwidth]{../img/training_Langevin_200000_iter.png}
         \caption{Training log of sigmoid activation}
+        \label{fig:training-log-lagevin}
     \end{subfigure}\hfill
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
         \includegraphics[trim={0 0 0 0.7cm}, clip, width=\textwidth]{../img/prediction_Langevin_200000_iter.png}
         \caption{Prediction of sigmoid activation}
+        \label{fig:prediction-sigmoid}
     \end{subfigure}
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
@@ -257,12 +262,15 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
         \centering
         \includegraphics[trim={0 0 0 0.7cm}, clip, width=\textwidth]{../img/prediction_Langevin_200000_tanh.png}
         \caption{Prediction of tanh activation}
+        \label{fig:prediction-tanh}
     \end{subfigure}
-    \caption{Training with Langevin Monte Carlo Sampling.}
+    \caption{Training with Unadjusted Langevin Method\citep{durmus2019high}. The training process took $45$ min on MacPro Intel i5 Chip. (b)(d) Prediction is made by sampling $30$ times. Each time series is plotted in semi-transparent gray. The mean and ground truth are plotted, respectively.}
 \end{figure}
 
 
 \subsection{HMC failed to find the posterior distribution}
+
+The iteration of $4\times 10^5$ is used to derive the posterior distribution. Each iteration yields $30$ samples to calculate the log-likelihood. Same as MALA method, more iteration is needed to achieve a higher log-likelihood (Fig. \ref{training-log-HMC}). Noted that the prediction of HMC (Fig. \ref{prediction-HMC})is more noisy compared to other methods.
 
 \begin{figure}[h]
     \centering
@@ -270,22 +278,27 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
         \centering
         \includegraphics[width=\textwidth]{../img/training_HMC_400000_iter.png}
         \caption{Training log of sigmoid activation}
+        \label{training-log-HMC}
     \end{subfigure}\hfill
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
         \includegraphics[trim={0 0 0 0.7cm}, clip, width=\textwidth]{../img/prediction_HMC_400000_iter.png}
         \caption{Prediction of sigmoid activation}
+        \label{prediction-HMC}
     \end{subfigure}
-    \caption{Training with Hamiltonian Monte Carlo Sampling.}
+    \caption{Training with Hamiltonian Monte Carlo Sampling\citep{neal1996}.}
 \end{figure}
 
-\subsection{Model Size}
+\subsection{With sampling method fixed, model size is not proportional to log likelihood.}
+
+The model size is not proportional to the log likelihood. In Fig. \ref{fig:big-net-training}, the model with hidden layer of 128 nodes performs worse than the model with hidden layer of 10 nodes. This implies that the complicated neural network does not always lead to better result, which is similar to the scissor effect \citep[Ch 1.]{braga2020fundamentals}.
  
 \begin{figure}[h]
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
         \includegraphics[width=\textwidth]{../img/training_Langevin_200000_128.png}
         \caption{Training with Langevin Monte Carlo Sampling}
+        \label{fig:big-net-training}
     \end{subfigure}\hfill
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
@@ -297,17 +310,24 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
 
 \section{Discussion}
 
-\subsection{The independence of dataset is questionable?}
+\subsection{Langevin methods provide better posterior approximation of high dimensional Bayesian neural network than Hamiltonian Monte Carlo}
 
-In \cite{chandra2021bayesian}, the log likelihood is applied to find the best distribution of posterior. The likelihood $p(D|W)$ is the product of all i.i.d. experiments.
+The Hamiltonian Monte Carlo is a classic sampling method for Bayesian neural network\citep{neal1996}, that is inspired by the Hamiltonian mechanics. In pratical, this method requires fine-tuning of two parameters: leapfrog step and iterations. As shown in Fig. \ref{training-log-HMC}, the log likelihood is poorly found. This may due to ill-defined parameter setting of leapfrog and sampling iterations, and finding appropriate parameter setting is the difficult part of Hamiltonian Monte Carlo. Notebly, No-U-Turn sampler modified HMC and does not require the parameter tuning\citep{hoffman2014no}. The Langevin method seems more suitable for this model (Fig. \ref{fig:training-log-lagevin}) with the proposed setting (Sec. \ref{sec:notebook}). However, the solid conclusion requires the exploration of parameter setting of leapfrog and iterations.
 
 
-\begin{figure}[h]
+\subsection{Token's embedding method introduces dependence in dataset }
+
+In \cite{chandra2021bayesian}, the log likelihood is applied to find the best distribution of posterior. The likelihood $p(D|W)$ is the product of all i.i.d. experiments (Eq, \ref{eq:likelihood}). The autocorrelation is one concerned when applying log likelihood (Eq. \ref{eq:log-likelihood}). As shown in Fig. \ref{fig:auto}, the stock market signal is autocorrelated, and that introuces correlation in dataset matrix (Eq. \ref{eq:window}). In the case of correlated sampling of $x$, the log likelihood may not be simply the product of all trials. 
+
+
+
+\begin{figure}[htb]
     \centering
     \includegraphics[width=0.7\textwidth]{../img/autocorrelation.pdf}
     \caption{Autocorrelation of the stock market signal (Fig. \ref{fig:mm8-train})}
     \label{fig:auto}
 \end{figure}
+
 
 \bibliography{ref}
 

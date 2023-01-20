@@ -240,7 +240,7 @@ The iteration of $5\times 10^4$ is used to derive the posterior distribution. Ea
 
 The iteration of $2\times 10^5$ is used to derive the posterior distribution. Each iteration yields $30$ samples to calculate the log-likelihood. The training log (Fig. \ref{fig:training-log-lagevin}) reaches the optimal value of log-likelihood after $2\times 10^5$ times. Noted that the performance is better when choosing sigmoid function as our activation function than tanh function (Fig. \ref{fig:prediction-sigmoid}, \ref{fig:prediction-tanh}).
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \begin{subfigure}[b]{0.5\textwidth}
         \centering
@@ -341,7 +341,7 @@ The source code of \cite{chandra2021bayesian} is coded in \textit{NumPy} and \te
 
 \section{Summary}
 
-In this project, we applied three different sampler with Bayesian neural network with one hidden layer. The Token's embedding theorem is also applied to recover the stock market signal with error estimation. We also focused on the log likelihood of each method, and unadjusted Langevin method performed best among the three. The results suggest that unadjusted Langevin method is suitable for high dimensional sampling problem, and provides good convergence. In re-implementation, we introduced the Jax ecosystem for just-in-time compilation, automatic differentiation, and brought GPU acceleration into the play. This project may shed an light on practical sampling method of applying Bayesian neural network on time-series recovery.
+In this project, we applied three different sampler with Bayesian neural network with one hidden layer. The Token's embedding theorem is also applied to recover the stock market signal with error estimation. We also focused on the log likelihood of each method, and unadjusted Langevin method performed best among the three. The results suggest that unadjusted Langevin method is suitable for high dimensional sampling problem, and provides good convergence. In the re-implementation, we introduced the Jax ecosystem for just-in-time compilation, automatic differentiation, and brought GPU acceleration into the play. This project may shed an light on practical sampling method of applying Bayesian neural network on time-series recovery.
 
 \bibliography{ref}
 
